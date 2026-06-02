@@ -115,13 +115,13 @@ export function BarChartSection({ data }) {
           <XAxis
             dataKey="shortMonth"
             stroke="transparent"
-            tick={{ fill: '#4e6080', fontSize: 11, fontWeight: 600 }}
+            tick={{ fill: '#8fadc8', fontSize: 11, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             stroke="transparent"
-            tick={{ fill: '#4e6080', fontSize: 10 }}
+            tick={{ fill: '#7a9bbf', fontSize: 10 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={formatShortCurrency}

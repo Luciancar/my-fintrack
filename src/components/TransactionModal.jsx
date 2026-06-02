@@ -149,7 +149,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, editData }) 
             <h2 style={{ fontSize: 18, fontWeight: 800, marginBottom: 2 }}>
               {editData ? 'Chỉnh sửa giao dịch' : 'Thêm giao dịch'}
             </h2>
-            <p style={{ fontSize: 12, color: 'var(--text-dim)' }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               {editData ? 'Cập nhật thông tin giao dịch' : 'Ghi lại khoản thu chi mới'}
             </p>
           </div>
@@ -174,7 +174,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, editData }) 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Type toggle */}
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               Loại giao dịch
             </label>
             <div style={{ display: 'flex', gap: 8, background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 4 }}>
@@ -206,7 +206,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, editData }) 
 
           {/* Category chips */}
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               Danh mục
             </label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -238,7 +238,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, editData }) 
 
           {/* Amount */}
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               Số tiền (VNĐ)
             </label>
             <div style={{ position: 'relative' }}>
@@ -268,7 +268,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, editData }) 
           {/* Date + Note side by side */}
           <div style={{ display: 'flex', gap: 10 }}>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 Ngày
               </label>
               <input
@@ -282,7 +282,7 @@ export default function TransactionModal({ isOpen, onClose, onSave, editData }) 
               />
             </div>
             <div style={{ flex: 2 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 8, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 Ghi chú
               </label>
               <input

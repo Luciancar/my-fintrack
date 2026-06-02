@@ -63,7 +63,7 @@ function TransactionItem({ tx, onEdit, onDelete, index }) {
         }}>
           {tx.note || cat?.label || tx.categoryId}
         </div>
-        <div style={{ fontSize: 11, color: 'var(--text-dim)', fontWeight: 500 }}>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500 }}>
           {cat?.label}
           {tx.note && tx.note !== cat?.label && (
             <span style={{
@@ -186,7 +186,7 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
       }}>
         <div>
           <h3 style={{ fontSize: 14, fontWeight: 700 }}>Lịch sử giao dịch</h3>
-          <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 1 }}>
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
             {total} giao dịch
           </p>
         </div>
@@ -242,13 +242,13 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
               padding: '10px 16px 5px',
               display: 'flex', alignItems: 'center', gap: 10,
             }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-dim)', letterSpacing: '0.04em' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.04em' }}>
                 {getDateLabel(group.date)}
               </span>
               <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
               <span style={{
-                fontSize: 10, color: 'var(--text-dim)',
-                background: 'rgba(255,255,255,0.04)',
+                fontSize: 10, color: 'var(--text-muted)',
+                background: 'rgba(255,255,255,0.06)',
                 padding: '2px 7px', borderRadius: 5, fontWeight: 600,
               }}>
                 {group.transactions.length}

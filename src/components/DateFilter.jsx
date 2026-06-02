@@ -121,7 +121,7 @@ export default function DateFilter({ year, month, selectedDate, onSelectDate }) 
             {DAYS_OF_WEEK.map(d => (
               <div key={d} style={{
                 textAlign: 'center', fontSize: 10, fontWeight: 700,
-                color: d === 'CN' || d === 'T7' ? 'rgba(99,102,241,0.6)' : 'var(--text-dim)',
+                color: d === 'CN' || d === 'T7' ? 'rgba(129,140,248,0.85)' : 'var(--text-muted)',
                 padding: '3px 0',
               }}>{d}</div>
             ))}
@@ -164,7 +164,7 @@ export default function DateFilter({ year, month, selectedDate, onSelectDate }) 
                         : isCurrentDay
                           ? '#818cf8'
                           : isWeekend
-                            ? 'rgba(129,140,248,0.7)'
+                            ? 'rgba(165,180,252,0.85)'
                             : 'var(--text-muted)',
                     fontSize: 12,
                     fontWeight: isSelected || isCurrentDay ? 700 : 400,
