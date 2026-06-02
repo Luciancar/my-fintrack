@@ -1,17 +1,23 @@
 import { useState, useEffect, useCallback } from 'react'
-import { generateSampleData } from '../data/sampleData'
 
 const STORAGE_KEY = 'expense_tracker_transactions'
+const VERSION_KEY = 'expense_tracker_version'
+const CURRENT_VERSION = '2'  // bump this to clear old cache
 
 export function useTransactions() {
   const [transactions, setTransactions] = useState(() => {
     try {
+      // Clear old sample data from previous version
+      const storedVersion = localStorage.getItem(VERSION_KEY)
+      if (storedVersion !== CURRENT_VERSION) {
+        localStorage.removeItem(STORAGE_KEY)
+        localStorage.setItem(VERSION_KEY, CURRENT_VERSION)
+        return []
+      }
       const stored = localStorage.getItem(STORAGE_KEY)
       if (stored) return JSON.parse(stored)
     } catch {}
-    const sample = generateSampleData()
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sample))
-    return sample
+    return []
   })
 
   useEffect(() => {
