@@ -77,7 +77,7 @@ export function BarChartSection({ data }) {
   return (
     <div
       className="glass-card"
-      style={{ flex: 3, padding: '22px 24px', minWidth: 280, animation: 'fadeInUp 0.6s ease both', animationDelay: '0.1s' }}
+      style={{ flex: 3, padding: '22px 24px', minWidth: 280, animation: 'slideInLeft 0.6s cubic-bezier(0.34,1.1,0.64,1) both', animationDelay: '0.15s' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
         <div>
@@ -163,7 +163,7 @@ export function PieChartSection({ data }) {
   return (
     <div className="glass-card" style={{
       flex: 2, padding: '22px 24px', minWidth: 220,
-      animation: 'fadeInUp 0.6s ease both', animationDelay: '0.2s',
+      animation: 'slideInRight 0.6s cubic-bezier(0.34,1.1,0.64,1) both', animationDelay: '0.2s',
     }}>
       <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Phân bổ chi tiêu</h3>
       <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 16 }}>Tháng này</p>

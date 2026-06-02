@@ -9,6 +9,7 @@ import { BarChartSection, PieChartSection } from './components/Charts'
 import TransactionList from './components/TransactionList'
 import TransactionModal from './components/TransactionModal'
 import AuthScreen from './components/AuthScreen'
+import ParticleBackground from './components/ParticleBackground'
 import { supabase } from './lib/supabase'
 
 export default function App() {
@@ -70,13 +71,15 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh' }}>
+      <ParticleBackground />
       {/* ── Header ── */}
       <header style={{
-        background: 'rgba(6,13,26,0.85)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(4,10,22,0.8)',
+        backdropFilter: 'blur(28px) saturate(1.8)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
         position: 'sticky', top: 0, zIndex: 100,
-        boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+        boxShadow: '0 4px 30px rgba(0,0,0,0.4)',
+        animation: 'slideDown 0.5s cubic-bezier(0.34,1.1,0.64,1) both',
       }}>
         <div style={{
           maxWidth: 1120, margin: '0 auto', padding: '0 24px',
@@ -270,14 +273,15 @@ export default function App() {
                   </div>
                   <div style={{
                     background: 'rgba(255,255,255,0.05)',
-                    borderRadius: 6, height: 5, overflow: 'hidden',
+                    borderRadius: 6, height: 6, overflow: 'hidden',
                   }}>
                     <div style={{
                       width: `${pct}%`, height: '100%',
                       background: `linear-gradient(90deg, ${d.color}cc, ${d.color})`,
                       borderRadius: 6,
-                      boxShadow: `0 0 8px ${d.color}60`,
-                      transition: 'width 0.8s cubic-bezier(0.34,1.1,0.64,1)',
+                      boxShadow: `0 0 10px ${d.color}70`,
+                      transition: 'width 1s cubic-bezier(0.34,1.1,0.64,1)',
+                      animationDelay: `${i * 80}ms`,
                     }} />
                   </div>
                 </div>

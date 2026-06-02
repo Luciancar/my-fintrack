@@ -69,81 +69,156 @@ input, select, textarea { font-family: inherit; }
 
 /* ── Global animation keyframes ── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.94); }
+  from { opacity: 0; transform: scale(0.92); }
   to   { opacity: 1; transform: scale(1); }
 }
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-12px); }
+  from { opacity: 0; transform: translateY(-14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(22px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 @keyframes pulse-ring {
-  0%   { transform: scale(1);    opacity: 0.6; }
-  70%  { transform: scale(1.25); opacity: 0; }
-  100% { transform: scale(1.25); opacity: 0; }
+  0%   { transform: scale(1);    opacity: 0.7; }
+  70%  { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
 }
 @keyframes shimmer {
   from { background-position: -200% center; }
-  to   { background-position: 200% center; }
+  to   { background-position:  200% center; }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-6px); }
+  50%       { transform: translateY(-7px); }
+}
+@keyframes float2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-5px) rotate(3deg); }
 }
 @keyframes spin-slow {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
 @keyframes count-up {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes bar-fill {
-  from { width: 0%; }
-  to   { width: var(--target-width); }
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(99,102,241,0.6), 0 0 80px rgba(99,102,241,0.2); }
+}
+@keyframes border-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes particle-float {
+  0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.3; }
+  100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+}
+@keyframes aurora-shift {
+  0%, 100% { transform: scale(1) translate(0, 0); }
+  33%       { transform: scale(1.1) translate(3%, 2%); }
+  66%       { transform: scale(0.95) translate(-2%, 3%); }
+}
+@keyframes number-pop {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes line-draw {
+  from { stroke-dashoffset: 1000; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes ripple {
+  0%   { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(4); opacity: 0; }
 }
 
 /* ── Glassmorphism card ── */
 .glass-card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.035);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: var(--radius);
-  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.06);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  box-shadow: var(--shadow),
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -1px 0 rgba(0,0,0,0.1);
+  transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  border-radius: inherit;
 }
 .glass-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-bright);
+  transform: translateY(-3px) scale(1.005);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: var(--shadow),
+    0 20px 60px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
-/* ── Shimmer loading ── */
+/* ── Shimmer skeleton ── */
 .shimmer {
   background: linear-gradient(90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.10) 50%,
-    rgba(255,255,255,0.04) 75%
+    rgba(255,255,255,0.03) 25%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.03) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.8s infinite linear;
+  animation: shimmer 1.6s infinite linear;
 }
 
 /* ── Animated number ── */
 .animated-value {
-  animation: count-up 0.5s ease forwards;
+  animation: count-up 0.45s cubic-bezier(0.34,1.2,0.64,1) forwards;
 }
 
-/* ── Progress bar animated ── */
-.progress-bar {
-  animation: bar-fill 0.8s cubic-bezier(0.34,1.56,0.64,1) forwards;
+/* ── Ripple effect on click ── */
+.ripple-btn {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-btn::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: scale(0);
+  top: 50%; left: 50%;
+  margin: -10px 0 0 -10px;
+  animation: ripple 0.6s ease-out;
+  pointer-events: none;
 }
 
 /* ── Reduce motion ── */

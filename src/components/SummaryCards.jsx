@@ -1,29 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { formatCurrency } from '../utils/format'
 
-/**
- * Animated counting number hook
- */
-function useCountUp(target, duration = 900) {
+/* ── Animated count-up hook ── */
+function useCountUp(target, duration = 950) {
   const [display, setDisplay] = useState(0)
-  const prev = useRef(0)
-  const raf = useRef(null)
+  const prev    = useRef(0)
+  const raf     = useRef(null)
+  const prevTarget = useRef(target)
 
   useEffect(() => {
-    const start = prev.current
-    const diff = target - start
+    const start    = prev.current
+    const diff     = target - start
     const startTime = performance.now()
 
+    cancelAnimationFrame(raf.current)
     const tick = (now) => {
-      const elapsed = now - startTime
+      const elapsed  = now - startTime
       const progress = Math.min(elapsed / duration, 1)
-      // ease out cubic
-      const ease = 1 - Math.pow(1 - progress, 3)
+      const ease     = 1 - Math.pow(1 - progress, 4) // ease-out-quart
       setDisplay(Math.round(start + diff * ease))
       if (progress < 1) raf.current = requestAnimationFrame(tick)
-      else prev.current = target
+      else { prev.current = target; prevTarget.current = target }
     }
-    cancelAnimationFrame(raf.current)
     raf.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf.current)
   }, [target, duration])
@@ -31,76 +29,122 @@ function useCountUp(target, duration = 900) {
   return display
 }
 
-function SummaryCard({ label, amount, color, glowVar, icon, sub, delay = 0 }) {
-  const animated = useCountUp(amount, 800)
-  const [visible, setVisible] = useState(false)
+/* ── 3D tilt card ── */
+function SummaryCard({ label, amount, color, glowColor, icon, sub, delay = 0 }) {
+  const animated = useCountUp(amount, 900)
+  const [visible, setVisible]   = useState(false)
+  const [tilt, setTilt]         = useState({ x: 0, y: 0 })
+  const [hovered, setHovered]   = useState(false)
+  const cardRef = useRef()
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), delay)
     return () => clearTimeout(t)
   }, [delay])
 
+  const handleMouseMove = useCallback((e) => {
+    const rect = cardRef.current.getBoundingClientRect()
+    const x = ((e.clientX - rect.left) / rect.width  - 0.5) * 16
+    const y = ((e.clientY - rect.top)  / rect.height - 0.5) * -16
+    setTilt({ x, y })
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    setTilt({ x: 0, y: 0 })
+    setHovered(false)
+  }, [])
+
   return (
     <div
-      className="glass-card"
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={handleMouseLeave}
       style={{
-        padding: '22px 26px',
-        flex: 1,
-        minWidth: 200,
-        opacity: visible ? 1 : 0,
-        transform: visible ? 'translateY(0)' : 'translateY(20px)',
-        transition: `opacity 0.5s ease ${delay}ms, transform 0.5s cubic-bezier(0.34,1.2,0.64,1) ${delay}ms`,
+        flex: 1, minWidth: 190,
+        padding: '22px 24px',
+        background: 'rgba(255,255,255,0.035)',
+        backdropFilter: 'blur(24px)',
+        border: `1px solid ${hovered ? color + '40' : 'rgba(255,255,255,0.08)'}`,
+        borderTop: `2px solid ${color}60`,
+        borderRadius: 20,
         position: 'relative',
         overflow: 'hidden',
-        boxShadow: `var(--shadow), ${glowVar}`,
-        borderTop: `1.5px solid ${color}40`,
+        cursor: 'default',
+        opacity: visible ? 1 : 0,
+        transform: visible
+          ? `perspective(800px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateY(${hovered ? '-4px' : '0'}) scale(${hovered ? 1.02 : 1})`
+          : 'translateY(28px) scale(0.95)',
+        transition: visible
+          ? 'border-color 0.25s ease, opacity 0.1s'
+          : `opacity 0.55s ease ${delay}ms, transform 0.55s cubic-bezier(0.34,1.2,0.64,1) ${delay}ms`,
+        boxShadow: hovered
+          ? `0 20px 60px rgba(0,0,0,0.45), 0 0 30px ${glowColor}35`
+          : '0 8px 32px rgba(0,0,0,0.3)',
+        willChange: 'transform',
       }}
     >
-      {/* Subtle gradient glow behind */}
+      {/* Spotlight */}
       <div style={{
-        position: 'absolute', inset: 0,
-        background: `radial-gradient(ellipse 80% 60% at 10% 0%, ${color}15 0%, transparent 70%)`,
-        pointerEvents: 'none',
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: `radial-gradient(ellipse 70% 50% at ${50 + tilt.x * 3}% ${50 - tilt.y * 3}%, ${color}12 0%, transparent 70%)`,
+        transition: 'background 0.15s ease',
+        borderRadius: 'inherit',
       }} />
 
+      {/* Top glow line */}
+      <div style={{
+        position: 'absolute', top: 0, left: '10%', right: '10%', height: 1,
+        background: `linear-gradient(90deg, transparent, ${color}80, transparent)`,
+        opacity: hovered ? 1 : 0.4,
+        transition: 'opacity 0.3s',
+      }} />
+
+      {/* Content */}
       <div style={{ position: 'relative', zIndex: 1 }}>
-        {/* Icon + label row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-dim)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            {label}
-          </span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <span style={{
+            fontSize: 11, fontWeight: 700, letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--text-dim)',
+            background: 'rgba(255,255,255,0.04)',
+            padding: '3px 8px', borderRadius: 5,
+          }}>{label}</span>
+
           <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: `${color}20`,
-            border: `1px solid ${color}35`,
+            width: 38, height: 38, borderRadius: 11,
+            background: `${color}18`,
+            border: `1px solid ${color}30`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 17,
-            transition: 'transform 0.3s ease',
-          }}
-            onMouseOver={e => e.currentTarget.style.transform = 'scale(1.12) rotate(5deg)'}
-            onMouseOut={e => e.currentTarget.style.transform = 'scale(1) rotate(0deg)'}
-          >
-            {icon}
-          </div>
+            fontSize: 18,
+            transition: 'transform 0.35s cubic-bezier(0.34,1.4,0.64,1), box-shadow 0.3s',
+            transform: hovered ? 'scale(1.2) rotate(8deg)' : 'scale(1) rotate(0deg)',
+            boxShadow: hovered ? `0 4px 16px ${color}40` : 'none',
+          }}>{icon}</div>
         </div>
 
-        {/* Amount */}
-        <div
-          className="animated-value"
-          style={{
-            fontSize: 26, fontWeight: 800,
-            color,
-            letterSpacing: '-1px',
-            lineHeight: 1.1,
-            marginBottom: 6,
-            fontVariantNumeric: 'tabular-nums',
-          }}
-        >
+        <div style={{
+          fontSize: 27, fontWeight: 800,
+          color, letterSpacing: '-1.2px',
+          lineHeight: 1, marginBottom: 7,
+          fontVariantNumeric: 'tabular-nums',
+          textShadow: hovered ? `0 0 20px ${color}60` : 'none',
+          transition: 'text-shadow 0.3s',
+          animation: visible ? `count-up 0.5s cubic-bezier(0.34,1.2,0.64,1) ${delay}ms both` : 'none',
+        }}>
           {formatCurrency(animated)}
         </div>
 
-        {/* Sub label */}
-        <div style={{ fontSize: 12, color: 'var(--text-dim)', fontWeight: 500 }}>
+        <div style={{
+          fontSize: 12, color: 'var(--text-dim)', fontWeight: 500,
+          display: 'flex', alignItems: 'center', gap: 5,
+        }}>
+          <div style={{
+            width: 5, height: 5, borderRadius: '50%',
+            background: color, opacity: 0.7,
+            boxShadow: `0 0 6px ${color}`,
+            animation: 'pulse-ring 2s ease-out infinite',
+          }} />
           {sub}
         </div>
       </div>
@@ -110,45 +154,12 @@ function SummaryCard({ label, amount, color, glowVar, icon, sub, delay = 0 }) {
 
 export default function SummaryCards({ income, expense, balance }) {
   const saving = balance >= 0 ? balance : 0
-
   return (
     <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-      <SummaryCard
-        label="Thu nhập"
-        amount={income}
-        color="#10b981"
-        glowVar="var(--shadow-glow-green)"
-        icon="💹"
-        sub="Tổng trong tháng"
-        delay={0}
-      />
-      <SummaryCard
-        label="Chi tiêu"
-        amount={expense}
-        color="#ef4444"
-        glowVar="var(--shadow-glow-red)"
-        icon="💸"
-        sub="Tổng trong tháng"
-        delay={80}
-      />
-      <SummaryCard
-        label="Tiết kiệm"
-        amount={saving}
-        color="#06b6d4"
-        glowVar="var(--shadow-glow-blue)"
-        icon="🏦"
-        sub={saving > 0 ? 'Đang tiết kiệm tốt 🎉' : 'Chưa có tiết kiệm'}
-        delay={160}
-      />
-      <SummaryCard
-        label="Số dư còn lại"
-        amount={Math.abs(balance)}
-        color={balance >= 0 ? '#818cf8' : '#f87171'}
-        glowVar={balance >= 0 ? 'var(--shadow-glow-purple)' : 'var(--shadow-glow-red)'}
-        icon={balance >= 0 ? '✨' : '⚠️'}
-        sub={balance >= 0 ? 'Thu > Chi ✓' : 'Chi vượt thu nhập'}
-        delay={240}
-      />
+      <SummaryCard label="Thu nhập"     amount={income}           color="#10b981" glowColor="#10b981" icon="💹" sub="Tổng trong tháng"              delay={0}   />
+      <SummaryCard label="Chi tiêu"     amount={expense}          color="#ef4444" glowColor="#ef4444" icon="💸" sub="Tổng trong tháng"              delay={90}  />
+      <SummaryCard label="Tiết kiệm"    amount={saving}           color="#06b6d4" glowColor="#06b6d4" icon="🏦" sub={saving > 0 ? 'Đang tốt 🎉' : 'Chưa có'} delay={180} />
+      <SummaryCard label="Số dư"        amount={Math.abs(balance)} color={balance >= 0 ? '#818cf8' : '#f87171'} glowColor={balance >= 0 ? '#818cf8' : '#f87171'} icon={balance >= 0 ? '✨' : '⚠️'} sub={balance >= 0 ? 'Thu > Chi ✓' : 'Vượt ngân sách'} delay={270} />
     </div>
   )
 }

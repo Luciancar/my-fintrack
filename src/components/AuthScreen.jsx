@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import ParticleBackground from './ParticleBackground'
 
 const inputStyle = {
   width: '100%',
@@ -9,7 +10,7 @@ const inputStyle = {
   color: '#f1f5f9',
   fontSize: 14,
   outline: 'none',
-  transition: 'border-color 0.2s, box-shadow 0.2s',
+  transition: 'border-color 0.2s, box-shadow 0.2s, background 0.2s',
   fontFamily: 'Inter, sans-serif',
 }
 
@@ -74,6 +75,7 @@ export default function AuthScreen({ onSignIn, onSignUp }) {
 
   return (
     <div style={outerStyle}>
+      <ParticleBackground />
       <div style={cardStyle}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28, justifyContent: 'center' }}>
