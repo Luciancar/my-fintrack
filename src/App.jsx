@@ -3,6 +3,7 @@ import { useTransactions } from './hooks/useTransactions'
 import { computeMonthStats, computeCategoryBreakdown, computeLast6Months } from './utils/stats'
 import SummaryCards from './components/SummaryCards'
 import MonthPicker from './components/MonthPicker'
+import DateFilter from './components/DateFilter'
 import { BarChartSection, PieChartSection } from './components/Charts'
 import TransactionList from './components/TransactionList'
 import TransactionModal from './components/TransactionModal'
@@ -18,9 +19,32 @@ export default function App() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
+  const [selectedDate, setSelectedDate] = useState(null)
+
+  // When month changes, clear day filter
+  const handleMonthChange = (y, m) => {
+    setYear(y)
+    setMonth(m)
+    setSelectedDate(null)
+  }
 
   const { income, expense, balance, transactions: monthTxs } = computeMonthStats(transactions, year, month)
-  const categoryBreakdown = computeCategoryBreakdown(monthTxs)
+
+  // Apply day filter on top of month transactions
+  const filteredTxs = selectedDate
+    ? monthTxs.filter(t => t.date === selectedDate)
+    : monthTxs
+
+  // Stats for the selected day (or full month if no day selected)
+  const dayIncome  = filteredTxs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+  const dayExpense = filteredTxs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+  const dayBalance = dayIncome - dayExpense
+
+  const displayIncome  = selectedDate ? dayIncome  : income
+  const displayExpense = selectedDate ? dayExpense : expense
+  const displayBalance = selectedDate ? dayBalance : balance
+
+  const categoryBreakdown = computeCategoryBreakdown(filteredTxs)
   const last6Months = computeLast6Months(transactions)
 
   const handleEdit = (tx) => { setEditData(tx); setModalOpen(true) }
@@ -101,7 +125,7 @@ export default function App() {
       {/* ── Main ── */}
       <main style={{ maxWidth: 1120, margin: '0 auto', padding: '28px 24px 80px' }}>
 
-        {/* Page title + Month picker */}
+        {/* Page title + Month picker + Date filter */}
         <div style={{
           display: 'flex', alignItems: 'flex-end',
           justifyContent: 'space-between',
@@ -117,15 +141,25 @@ export default function App() {
               Tổng quan tài chính
             </h1>
             <p style={{ fontSize: 13, color: 'var(--text-dim)', fontWeight: 400 }}>
-              Theo dõi thu chi — kiểm soát ngân sách cá nhân
+              {selectedDate
+                ? `Đang xem ngày ${selectedDate.split('-').reverse().join('/')}`
+                : 'Theo dõi thu chi — kiểm soát ngân sách cá nhân'}
             </p>
           </div>
-          <MonthPicker year={year} month={month} onChange={(y, m) => { setYear(y); setMonth(m) }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <MonthPicker year={year} month={month} onChange={handleMonthChange} />
+            <DateFilter
+              year={year}
+              month={month}
+              selectedDate={selectedDate}
+              onSelectDate={setSelectedDate}
+            />
+          </div>
         </div>
 
         {/* ── Summary cards ── */}
         <div style={{ marginBottom: 20 }}>
-          <SummaryCards income={income} expense={expense} balance={balance} />
+          <SummaryCards income={displayIncome} expense={displayExpense} balance={displayBalance} />
         </div>
 
         {/* ── Charts row ── */}
@@ -199,7 +233,7 @@ export default function App() {
           {/* Transaction list */}
           <div style={{ flex: 1, minWidth: 300 }}>
             <TransactionList
-              transactions={monthTxs}
+              transactions={filteredTxs}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
