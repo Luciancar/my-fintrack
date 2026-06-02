@@ -1,0 +1,272 @@
+import React, { useState, useRef } from 'react'
+import { getCategoryById } from '../data/categories'
+import { formatCurrency, formatDate } from '../utils/format'
+import { groupTransactionsByDate } from '../utils/stats'
+import { parseISO, isToday, isYesterday } from 'date-fns'
+
+function getDateLabel(dateStr) {
+  const d = parseISO(dateStr)
+  if (isToday(d)) return '📅 Hôm nay'
+  if (isYesterday(d)) return '🕐 Hôm qua'
+  return formatDate(dateStr)
+}
+
+function TransactionItem({ tx, onEdit, onDelete, index }) {
+  const cat = getCategoryById(tx.categoryId)
+  const [showMenu, setShowMenu] = useState(false)
+  const [removing, setRemoving] = useState(false)
+  const menuRef = useRef()
+
+  const handleDelete = () => {
+    setRemoving(true)
+    setTimeout(() => onDelete(tx.id), 320)
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: '11px 16px',
+        borderRadius: 12,
+        transition: 'all 0.22s ease',
+        position: 'relative',
+        opacity: removing ? 0 : 1,
+        transform: removing ? 'translateX(30px)' : 'translateX(0)',
+        animationDelay: `${index * 30}ms`,
+        animation: 'fadeInUp 0.35s ease both',
+      }}
+      onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+      onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+    >
+      {/* Category icon */}
+      <div style={{
+        width: 42, height: 42, borderRadius: 12,
+        background: `${cat?.color || '#888'}18`,
+        border: `1px solid ${cat?.color || '#888'}30`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 19, flexShrink: 0,
+        transition: 'transform 0.2s ease',
+      }}
+        onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)'}
+        onMouseOut={e => e.currentTarget.style.transform = 'scale(1) rotate(0deg)'}
+      >
+        {cat?.icon || '📦'}
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontWeight: 600, fontSize: 14, color: 'var(--text)',
+          marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>
+          {tx.note || cat?.label || tx.categoryId}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-dim)', fontWeight: 500 }}>
+          {cat?.label}
+          {tx.note && tx.note !== cat?.label && (
+            <span style={{
+              marginLeft: 6, padding: '1px 6px',
+              background: `${cat?.color || '#888'}18`,
+              borderRadius: 4, color: cat?.color,
+              fontWeight: 600, fontSize: 10,
+            }}>
+              {cat?.icon} {cat?.label}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Amount */}
+      <div style={{
+        fontWeight: 800, fontSize: 15,
+        color: tx.type === 'income' ? '#10b981' : '#ef4444',
+        flexShrink: 0,
+        fontVariantNumeric: 'tabular-nums',
+        textShadow: tx.type === 'income'
+          ? '0 0 12px rgba(16,185,129,0.4)'
+          : '0 0 12px rgba(239,68,68,0.4)',
+      }}>
+        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+      </div>
+
+      {/* Context menu */}
+      <div style={{ position: 'relative', flexShrink: 0 }} ref={menuRef}>
+        <button
+          onClick={() => setShowMenu(v => !v)}
+          style={{
+            background: showMenu ? 'rgba(255,255,255,0.1)' : 'none',
+            border: 'none',
+            color: 'var(--text-dim)',
+            width: 28, height: 28,
+            borderRadius: 7,
+            fontSize: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.15s',
+          }}
+          onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'var(--text)' }}
+          onMouseOut={e => { if (!showMenu) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-dim)' } }}
+        >⋮</button>
+
+        {showMenu && (
+          <>
+            <div
+              onClick={() => setShowMenu(false)}
+              style={{ position: 'fixed', inset: 0, zIndex: 10 }}
+            />
+            <div style={{
+              position: 'absolute', right: 0, top: 'calc(100% + 4px)',
+              background: 'rgba(12,24,44,0.98)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 12,
+              overflow: 'hidden',
+              zIndex: 20,
+              minWidth: 140,
+              boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
+              backdropFilter: 'blur(12px)',
+              animation: 'slideDown 0.15s ease both',
+            }}>
+              <button
+                onClick={() => { onEdit(tx); setShowMenu(false) }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  width: '100%', padding: '10px 14px',
+                  background: 'none', border: 'none',
+                  color: 'var(--text)', fontSize: 13, textAlign: 'left',
+                  transition: 'background 0.1s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
+                onMouseOut={e => e.currentTarget.style.background = 'none'}
+              >
+                <span>✏️</span> Chỉnh sửa
+              </button>
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
+              <button
+                onClick={() => { handleDelete(); setShowMenu(false) }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  width: '100%', padding: '10px 14px',
+                  background: 'none', border: 'none',
+                  color: '#f87171', fontSize: 13, textAlign: 'left',
+                  transition: 'background 0.1s',
+                }}
+                onMouseOver={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
+                onMouseOut={e => e.currentTarget.style.background = 'none'}
+              >
+                <span>🗑️</span> Xoá
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function TransactionList({ transactions, onEdit, onDelete }) {
+  const [filter, setFilter] = useState('all')
+
+  const filtered = transactions.filter(t => {
+    if (filter === 'income') return t.type === 'income'
+    if (filter === 'expense') return t.type === 'expense'
+    return true
+  })
+
+  const groups = groupTransactionsByDate(filtered)
+  const total = filtered.length
+
+  return (
+    <div className="glass-card" style={{ overflow: 'hidden', animation: 'fadeInUp 0.6s ease both', animationDelay: '0.35s' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '18px 20px 14px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <div>
+          <h3 style={{ fontSize: 14, fontWeight: 700 }}>Lịch sử giao dịch</h3>
+          <p style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 1 }}>
+            {total} giao dịch
+          </p>
+        </div>
+
+        {/* Filter tabs */}
+        <div style={{
+          display: 'flex', gap: 3,
+          background: 'rgba(255,255,255,0.04)',
+          borderRadius: 10, padding: 3,
+          border: '1px solid rgba(255,255,255,0.06)',
+        }}>
+          {[
+            { value: 'all',     label: 'Tất cả' },
+            { value: 'income',  label: '↑ Thu' },
+            { value: 'expense', label: '↓ Chi' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setFilter(opt.value)}
+              style={{
+                padding: '5px 13px',
+                borderRadius: 7,
+                border: 'none',
+                background: filter === opt.value ? 'rgba(255,255,255,0.1)' : 'transparent',
+                color: filter === opt.value ? 'var(--text)' : 'var(--text-dim)',
+                fontWeight: filter === opt.value ? 700 : 400,
+                fontSize: 12,
+                transition: 'all 0.18s ease',
+                boxShadow: filter === opt.value ? 'inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
+              }}
+            >{opt.label}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ maxHeight: 480, overflowY: 'auto', padding: '6px 4px 8px' }}>
+        {groups.length === 0 ? (
+          <div style={{
+            textAlign: 'center', padding: '48px 20px',
+            color: 'var(--text-dim)',
+          }}>
+            <div style={{ fontSize: 44, marginBottom: 10, animation: 'float 3s ease-in-out infinite' }}>📭</div>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>Không có giao dịch</div>
+            <div style={{ fontSize: 12, marginTop: 4, color: 'var(--text-dim)' }}>
+              Thêm giao dịch đầu tiên của bạn
+            </div>
+          </div>
+        ) : groups.map(group => (
+          <div key={group.date}>
+            {/* Date label */}
+            <div style={{
+              padding: '10px 16px 5px',
+              display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-dim)', letterSpacing: '0.04em' }}>
+                {getDateLabel(group.date)}
+              </span>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
+              <span style={{
+                fontSize: 10, color: 'var(--text-dim)',
+                background: 'rgba(255,255,255,0.04)',
+                padding: '2px 7px', borderRadius: 5, fontWeight: 600,
+              }}>
+                {group.transactions.length}
+              </span>
+            </div>
+
+            {group.transactions.map((tx, i) => (
+              <TransactionItem
+                key={tx.id}
+                tx={tx}
+                index={i}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
