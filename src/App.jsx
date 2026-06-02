@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { useTransactions } from './hooks/useTransactions'
+import { useSavingsPlans } from './hooks/useSavingsPlans'
 import { computeMonthStats, computeCategoryBreakdown, computeLast6Months } from './utils/stats'
 import SummaryCards from './components/SummaryCards'
 import MonthPicker from './components/MonthPicker'
@@ -10,6 +11,8 @@ import TransactionList from './components/TransactionList'
 import TransactionModal from './components/TransactionModal'
 import AuthScreen from './components/AuthScreen'
 import ParticleBackground from './components/ParticleBackground'
+import SavingsPlans from './components/SavingsPlans'
+import ChatBot from './components/ChatBot'
 import { supabase } from './lib/supabase'
 
 /* ── Page entry animation hook ── */
@@ -22,10 +25,12 @@ function usePageMount(delay = 0) {
 export default function App() {
   const { user, loading: authLoading, signIn, signUp, signOut } = useAuth()
   const { transactions, syncing, addTransaction, deleteTransaction, updateTransaction } = useTransactions(user)
+  const { plans, addPlan, updatePlan, deletePlan, addSaving } = useSavingsPlans(user)
   const [modalOpen, setModalOpen] = useState(false)
   const [editData, setEditData]   = useState(null)
   const [btnHover, setBtnHover]   = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('dashboard') // 'dashboard' | 'plans'
   const pageReady = usePageMount(80)
 
   const now = new Date()
@@ -119,14 +124,29 @@ export default function App() {
             </div>
           </div>
 
+          {/* Nav tabs */}
+          <div style={{ display:'flex', gap:2, background:'rgba(255,255,255,0.04)', borderRadius:11, padding:3, border:'1px solid rgba(255,255,255,0.07)' }}>
+            {[
+              { id:'dashboard', label:'📊 Tổng quan' },
+              { id:'plans',     label:'🎯 Kế hoạch' },
+            ].map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
+                padding:'7px 16px', borderRadius:8, border:'none',
+                background: activeTab === tab.id ? 'linear-gradient(135deg, rgba(99,102,241,0.4), rgba(79,70,229,0.3))' : 'transparent',
+                color: activeTab === tab.id ? '#f0f6ff' : 'var(--text-muted)',
+                fontWeight: activeTab === tab.id ? 700 : 400,
+                fontSize:13, cursor:'pointer', fontFamily:'Inter,sans-serif',
+                transition:'all 0.2s ease',
+                boxShadow: activeTab === tab.id ? 'inset 0 1px 0 rgba(255,255,255,0.1), 0 0 12px rgba(99,102,241,0.2)' : 'none',
+              }}>{tab.label}</button>
+            ))}
+          </div>
+
           {/* Right side */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             {/* Sync */}
             {syncing && (
-              <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, color:'var(--text-dim)',
-                background:'rgba(255,255,255,0.04)', padding:'5px 10px', borderRadius:8,
-                border:'1px solid rgba(255,255,255,0.07)', animation:'fadeInScale 0.2s ease both',
-              }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:12, color:'var(--text-dim)', background:'rgba(255,255,255,0.04)', padding:'5px 10px', borderRadius:8, border:'1px solid rgba(255,255,255,0.07)', animation:'fadeInScale 0.2s ease both' }}>
                 <span style={{ animation:'spin-slow 1s linear infinite', display:'inline-block', fontSize:13 }}>↻</span>
                 Đồng bộ...
               </div>
@@ -134,57 +154,21 @@ export default function App() {
 
             {/* User menu */}
             {user && (
-              <div style={{ position: 'relative' }}>
-                <button
-                  onClick={() => setUserMenuOpen(v => !v)}
-                  style={{
-                    display:'flex', alignItems:'center', gap:8,
-                    background: userMenuOpen ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)',
-                    border:`1px solid ${userMenuOpen ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                    borderRadius:11, padding:'6px 12px 6px 7px',
-                    cursor:'pointer', transition:'all 0.2s ease',
-                  }}
-                >
-                  <div style={{
-                    width:28, height:28, borderRadius:9,
-                    background:'linear-gradient(135deg, #6366f1, #06b6d4)',
-                    display:'flex', alignItems:'center', justifyContent:'center',
-                    fontSize:13, fontWeight:800, color:'#fff',
-                    boxShadow:'0 2px 8px rgba(99,102,241,0.4)',
-                  }}>{user.email[0].toUpperCase()}</div>
-                  <span style={{ fontSize:12, color:'var(--text-muted)', maxWidth:110, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-                    {user.email}
-                  </span>
+              <div style={{ position:'relative' }}>
+                <button onClick={() => setUserMenuOpen(v => !v)} style={{ display:'flex', alignItems:'center', gap:8, background: userMenuOpen ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.05)', border:`1px solid ${userMenuOpen ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius:11, padding:'6px 12px 6px 7px', cursor:'pointer', transition:'all 0.2s ease' }}>
+                  <div style={{ width:28, height:28, borderRadius:9, background:'linear-gradient(135deg, #6366f1, #06b6d4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:800, color:'#fff', boxShadow:'0 2px 8px rgba(99,102,241,0.4)' }}>{user.email[0].toUpperCase()}</div>
+                  <span style={{ fontSize:12, color:'var(--text-muted)', maxWidth:110, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user.email}</span>
                   <span style={{ fontSize:10, color:'var(--text-dim)', transform: userMenuOpen ? 'rotate(180deg)' : 'none', transition:'transform 0.2s', display:'inline-block' }}>▾</span>
                 </button>
                 {userMenuOpen && (
                   <>
                     <div onClick={() => setUserMenuOpen(false)} style={{ position:'fixed', inset:0, zIndex:10 }}/>
-                    <div style={{
-                      position:'absolute', right:0, top:'calc(100% + 8px)',
-                      background:'rgba(8,18,36,0.98)',
-                      border:'1px solid rgba(255,255,255,0.1)',
-                      borderRadius:14, overflow:'hidden', zIndex:20, minWidth:180,
-                      boxShadow:'0 16px 48px rgba(0,0,0,0.6)',
-                      backdropFilter:'blur(16px)',
-                      animation:'slideDown 0.18s cubic-bezier(0.34,1.2,0.64,1) both',
-                    }}>
+                    <div style={{ position:'absolute', right:0, top:'calc(100% + 8px)', background:'rgba(8,18,36,0.98)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:14, overflow:'hidden', zIndex:20, minWidth:180, boxShadow:'0 16px 48px rgba(0,0,0,0.6)', backdropFilter:'blur(16px)', animation:'slideDown 0.18s cubic-bezier(0.34,1.2,0.64,1) both' }}>
                       <div style={{ padding:'12px 16px', borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
                         <div style={{ fontSize:11, color:'var(--text-dim)', marginBottom:2 }}>Đăng nhập với</div>
                         <div style={{ fontSize:13, color:'#818cf8', fontWeight:600, overflow:'hidden', textOverflow:'ellipsis' }}>{user.email}</div>
                       </div>
-                      <button
-                        onClick={() => { signOut(); setUserMenuOpen(false) }}
-                        style={{
-                          display:'flex', alignItems:'center', gap:8,
-                          width:'100%', padding:'11px 16px',
-                          background:'none', border:'none', color:'#f87171',
-                          fontSize:13, cursor:'pointer', fontFamily:'Inter,sans-serif',
-                          transition:'background 0.15s',
-                        }}
-                        onMouseOver={e => e.currentTarget.style.background='rgba(239,68,68,0.1)'}
-                        onMouseOut={e => e.currentTarget.style.background='none'}
-                      >
+                      <button onClick={() => { signOut(); setUserMenuOpen(false) }} style={{ display:'flex', alignItems:'center', gap:8, width:'100%', padding:'11px 16px', background:'none', border:'none', color:'#f87171', fontSize:13, cursor:'pointer', fontFamily:'Inter,sans-serif', transition:'background 0.15s' }} onMouseOver={e => e.currentTarget.style.background='rgba(239,68,68,0.1)'} onMouseOut={e => e.currentTarget.style.background='none'}>
                         <span>⏏️</span> Đăng xuất
                       </button>
                     </div>
@@ -194,30 +178,9 @@ export default function App() {
             )}
 
             {/* Add button */}
-            <button
-              onClick={() => setModalOpen(true)}
-              onMouseEnter={() => setBtnHover(true)}
-              onMouseLeave={() => setBtnHover(false)}
-              style={{
-                display:'flex', alignItems:'center', gap:8,
-                background:'linear-gradient(135deg, #6366f1, #4f46e5)',
-                color:'#fff', border:'none', borderRadius:12,
-                padding:'10px 22px', fontSize:14, fontWeight:700,
-                cursor:'pointer', transition:'all 0.25s cubic-bezier(0.34,1.3,0.64,1)',
-                boxShadow: btnHover ? '0 8px 30px rgba(99,102,241,0.7)' : '0 4px 18px rgba(99,102,241,0.45)',
-                transform: btnHover ? 'translateY(-2px) scale(1.04)' : 'scale(1)',
-                position:'relative', overflow:'hidden',
-              }}
-            >
+            <button onClick={() => setModalOpen(true)} onMouseEnter={() => setBtnHover(true)} onMouseLeave={() => setBtnHover(false)} style={{ display:'flex', alignItems:'center', gap:8, background:'linear-gradient(135deg, #6366f1, #4f46e5)', color:'#fff', border:'none', borderRadius:12, padding:'10px 22px', fontSize:14, fontWeight:700, cursor:'pointer', transition:'all 0.25s cubic-bezier(0.34,1.3,0.64,1)', boxShadow: btnHover ? '0 8px 30px rgba(99,102,241,0.7)' : '0 4px 18px rgba(99,102,241,0.45)', transform: btnHover ? 'translateY(-2px) scale(1.04)' : 'scale(1)', position:'relative', overflow:'hidden' }}>
               <span style={{ fontSize:17, lineHeight:1, fontWeight:400 }}>＋</span>
               Thêm giao dịch
-              {/* shine sweep */}
-              <div style={{
-                position:'absolute', inset:0,
-                background:'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)',
-                backgroundSize:'200% 100%',
-                animation: btnHover ? 'shimmer 0.6s ease' : 'none',
-              }}/>
             </button>
           </div>
         </div>
@@ -226,6 +189,9 @@ export default function App() {
       {/* ══════════════ MAIN ══════════════ */}
       <main style={{ maxWidth:1140, margin:'0 auto', padding:'30px 24px 90px', position:'relative', zIndex:1 }}>
 
+        {/* ── DASHBOARD TAB ── */}
+        {activeTab === 'dashboard' && (
+        <>
         {/* Page header */}
         <div style={{
           display:'flex', alignItems:'flex-end', justifyContent:'space-between',
@@ -322,9 +288,28 @@ export default function App() {
             <TransactionList transactions={filteredTxs} onEdit={handleEdit} onDelete={deleteTransaction}/>
           </div>
         </div>
+        </>
+        )}
+
+        {/* ── PLANS TAB ── */}
+        {activeTab === 'plans' && (
+          <div style={{ animation:'fadeInUp 0.4s cubic-bezier(0.34,1.1,0.64,1) both' }}>
+            <SavingsPlans
+              plans={plans}
+              onAdd={addPlan}
+              onUpdate={updatePlan}
+              onDelete={deletePlan}
+              onAddSaving={addSaving}
+              avgMonthlyIncome={income}
+            />
+          </div>
+        )}
       </main>
 
       <TransactionModal isOpen={modalOpen} onClose={handleClose} onSave={handleSave} editData={editData}/>
+
+      {/* ── AI Chatbot ── */}
+      <ChatBot transactions={transactions} plans={plans} year={year} month={month}/>
     </div>
   )
 }
