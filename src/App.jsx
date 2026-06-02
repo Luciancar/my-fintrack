@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useAuth } from './hooks/useAuth'
 import { useTransactions } from './hooks/useTransactions'
 import { computeMonthStats, computeCategoryBreakdown, computeLast6Months } from './utils/stats'
 import SummaryCards from './components/SummaryCards'
@@ -7,26 +8,35 @@ import DateFilter from './components/DateFilter'
 import { BarChartSection, PieChartSection } from './components/Charts'
 import TransactionList from './components/TransactionList'
 import TransactionModal from './components/TransactionModal'
-import { formatCurrency } from './utils/format'
-import { getCategoryById } from './data/categories'
+import AuthScreen from './components/AuthScreen'
+import { supabase } from './lib/supabase'
 
 export default function App() {
-  const { transactions, addTransaction, deleteTransaction, updateTransaction } = useTransactions()
+  const { user, loading: authLoading, signIn, signUp, signOut } = useAuth()
+  const { transactions, syncing, addTransaction, deleteTransaction, updateTransaction } = useTransactions(user)
   const [modalOpen, setModalOpen] = useState(false)
-  const [editData, setEditData] = useState(null)
-  const [btnHover, setBtnHover] = useState(false)
+  const [editData, setEditData]   = useState(null)
+  const [btnHover, setBtnHover]   = useState(false)
 
   const now = new Date()
-  const [year, setYear] = useState(now.getFullYear())
-  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [year, setYear]               = useState(now.getFullYear())
+  const [month, setMonth]             = useState(now.getMonth() + 1)
   const [selectedDate, setSelectedDate] = useState(null)
 
-  // When month changes, clear day filter
-  const handleMonthChange = (y, m) => {
-    setYear(y)
-    setMonth(m)
-    setSelectedDate(null)
-  }
+  const handleMonthChange = (y, m) => { setYear(y); setMonth(m); setSelectedDate(null) }
+
+  // Show loading spinner while checking auth
+  if (authLoading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
+        <div style={{ fontSize: 40, marginBottom: 12, animation: 'spin-slow 2s linear infinite', display: 'inline-block' }}>⚙️</div>
+        <div style={{ fontSize: 14 }}>Đang tải...</div>
+      </div>
+    </div>
+  )
+
+  // Show auth screen if Supabase is configured but user not logged in
+  if (supabase && !user) return <AuthScreen onSignIn={signIn} onSignUp={signUp} />
 
   const { income, expense, balance, transactions: monthTxs } = computeMonthStats(transactions, year, month)
 
@@ -93,32 +103,77 @@ export default function App() {
             </div>
           </div>
 
-          {/* Add button */}
-          <button
-            onClick={() => setModalOpen(true)}
-            onMouseOver={() => setBtnHover(true)}
-            onMouseOut={() => setBtnHover(false)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              background: btnHover
-                ? 'linear-gradient(135deg, #818cf8, #6366f1)'
-                : 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 11,
-              padding: '9px 20px',
-              fontSize: 14, fontWeight: 700,
-              transition: 'all 0.22s cubic-bezier(0.34,1.2,0.64,1)',
-              boxShadow: btnHover
-                ? '0 6px 24px rgba(99,102,241,0.6)'
-                : '0 4px 16px rgba(99,102,241,0.4)',
-              transform: btnHover ? 'translateY(-1px) scale(1.03)' : 'translateY(0) scale(1)',
-              letterSpacing: '0.01em',
-            }}
-          >
-            <span style={{ fontSize: 18, lineHeight: 1 }}>＋</span>
-            Thêm giao dịch
-          </button>
+          {/* Add button + user info */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Sync indicator */}
+            {syncing && (
+              <div style={{ fontSize: 12, color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ animation: 'spin-slow 1.5s linear infinite', display: 'inline-block' }}>🔄</span>
+                Đang đồng bộ...
+              </div>
+            )}
+
+            {/* User badge + logout */}
+            {user && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 10, padding: '5px 12px 5px 8px',
+              }}>
+                <div style={{
+                  width: 26, height: 26, borderRadius: 8,
+                  background: 'linear-gradient(135deg, #6366f1, #06b6d4)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, fontWeight: 700, color: '#fff', flexShrink: 0,
+                }}>
+                  {user.email[0].toUpperCase()}
+                </div>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {user.email}
+                </span>
+                <button
+                  onClick={signOut}
+                  title="Đăng xuất"
+                  style={{
+                    background: 'none', border: 'none',
+                    color: 'var(--text-dim)', fontSize: 14,
+                    cursor: 'pointer', padding: '2px 4px',
+                    borderRadius: 5,
+                    transition: 'color 0.15s',
+                    marginLeft: 2,
+                  }}
+                  onMouseOver={e => e.currentTarget.style.color = '#f87171'}
+                  onMouseOut={e => e.currentTarget.style.color = 'var(--text-dim)'}
+                >⏏</button>
+              </div>
+            )}
+
+            <button
+              onClick={() => setModalOpen(true)}
+              onMouseOver={() => setBtnHover(true)}
+              onMouseOut={() => setBtnHover(false)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                background: btnHover
+                  ? 'linear-gradient(135deg, #818cf8, #6366f1)'
+                  : 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 11,
+                padding: '9px 20px',
+                fontSize: 14, fontWeight: 700,
+                transition: 'all 0.22s cubic-bezier(0.34,1.2,0.64,1)',
+                boxShadow: btnHover
+                  ? '0 6px 24px rgba(99,102,241,0.6)'
+                  : '0 4px 16px rgba(99,102,241,0.4)',
+                transform: btnHover ? 'translateY(-1px) scale(1.03)' : 'translateY(0) scale(1)',
+              }}
+            >
+              <span style={{ fontSize: 18, lineHeight: 1 }}>＋</span>
+              Thêm giao dịch
+            </button>
+          </div>
         </div>
       </header>
 
