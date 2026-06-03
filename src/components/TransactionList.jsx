@@ -113,7 +113,7 @@ function TransactionItem({ tx, onEdit, onDelete, index }) {
           <>
             <div
               onClick={() => setShowMenu(false)}
-              style={{ position: 'fixed', inset: 0, zIndex: 10 }}
+              style={{ position: 'fixed', inset: 0, zIndex: 299 }}
             />
             <div style={{
               position: 'absolute', right: 0, top: 'calc(100% + 4px)',
@@ -121,7 +121,7 @@ function TransactionItem({ tx, onEdit, onDelete, index }) {
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 12,
               overflow: 'hidden',
-              zIndex: 20,
+              zIndex: 300,
               minWidth: 140,
               boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
               backdropFilter: 'blur(12px)',
@@ -177,12 +177,13 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
   const total = filtered.length
 
   return (
-    <div className="glass-card" style={{ overflow: 'hidden', animation: 'fadeInUp 0.6s ease both', animationDelay: '0.35s' }}>
+    <div className="glass-card" style={{ overflow: 'visible', animation: 'fadeInUp 0.6s ease both', animationDelay: '0.35s' }}>
       {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '18px 20px 14px',
         borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '18px 18px 0 0',
       }}>
         <div>
           <h3 style={{ fontSize: 14, fontWeight: 700 }}>Lịch sử giao dịch</h3>
@@ -223,7 +224,11 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
       </div>
 
       {/* Content */}
-      <div style={{ maxHeight: 480, overflowY: 'auto', padding: '6px 4px 8px' }}>
+      <div style={{
+        maxHeight: 480, overflowY: 'auto', overflowX: 'visible',
+        padding: '6px 4px 8px',
+        borderRadius: '0 0 18px 18px',
+      }}>
         {groups.length === 0 ? (
           <div style={{
             textAlign: 'center', padding: '48px 20px',

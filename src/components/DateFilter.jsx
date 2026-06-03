@@ -37,7 +37,7 @@ export default function DateFilter({ year, month, selectedDate, onSelectDate }) 
   const hasFilter = !!selectedDate
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref} style={{ position: 'relative', isolation: 'isolate' }}>
       {/* Trigger button */}
       <button
         onClick={() => setOpen(v => !v)}
@@ -97,14 +97,15 @@ export default function DateFilter({ year, month, selectedDate, onSelectDate }) 
           position: 'absolute',
           top: 'calc(100% + 8px)',
           right: 0,
-          zIndex: 200,
+          zIndex: 400,
           background: 'rgba(8,18,36,0.98)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 18,
           padding: '16px',
           width: 272,
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06)',
           backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           animation: 'slideDown 0.18s cubic-bezier(0.34,1.2,0.64,1) both',
         }}>
           {/* Month label */}
