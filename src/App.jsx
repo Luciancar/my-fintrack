@@ -196,7 +196,6 @@ export default function App() {
         <div style={{
           display:'flex', alignItems:'flex-end', justifyContent:'space-between',
           marginBottom:26, flexWrap:'wrap', gap:14,
-          animation:'slideDown 0.5s cubic-bezier(0.34,1.1,0.64,1) both',
         }}>
           <div>
             <h1 style={{
@@ -284,7 +283,7 @@ export default function App() {
           </div>
 
           {/* Transactions */}
-          <div style={{ flex:1, minWidth:300, animation:'slideInRight 0.6s cubic-bezier(0.34,1.1,0.64,1) both', animationDelay:'0.35s' }}>
+          <div style={{ flex:1, minWidth:300 }}>
             <TransactionList transactions={filteredTxs} onEdit={handleEdit} onDelete={deleteTransaction}/>
           </div>
         </div>

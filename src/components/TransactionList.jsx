@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { getCategoryById } from '../data/categories'
 import { formatCurrency, formatDate } from '../utils/format'
 import { groupTransactionsByDate } from '../utils/stats'
@@ -11,34 +11,38 @@ function getDateLabel(dateStr) {
   return formatDate(dateStr)
 }
 
-function TransactionItem({ tx, onEdit, onDelete, index }) {
+function TransactionItem({ tx, onEdit, onDelete }) {
   const cat = getCategoryById(tx.categoryId)
   const [showMenu, setShowMenu] = useState(false)
   const [removing, setRemoving] = useState(false)
-  const menuRef = useRef()
 
-  const handleDelete = () => {
+  const handleDelete = (e) => {
+    e.stopPropagation() // Chặn lan truyền sự kiện bấm lung tung
     setRemoving(true)
     setTimeout(() => onDelete(tx.id), 320)
   }
 
+  const handleEdit = (e) => {
+    e.stopPropagation() // Cô lập sự kiện sửa
+    onEdit(tx)
+    setShowMenu(false)
+  }
+
   return (
     <div
+      className="transaction-item-row"
       style={{
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        padding: '11px 16px',
+        padding: '12px 16px', 
         borderRadius: 12,
-        transition: 'all 0.22s ease',
+        transition: 'background 0.15s ease, transform 0.32s ease, opacity 0.32s ease',
         position: 'relative',
         opacity: removing ? 0 : 1,
-        transform: removing ? 'translateX(30px)' : 'translateX(0)',
-        animationDelay: `${index * 30}ms`,
-        animation: 'fadeInUp 0.35s ease both',
+        transform: removing ? 'translateX(30px)' : 'none',
+        zIndex: showMenu ? 10 : 1, 
       }}
-      onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-      onMouseOut={e => e.currentTarget.style.background = 'transparent'}
     >
       {/* Category icon */}
       <div style={{
@@ -47,10 +51,7 @@ function TransactionItem({ tx, onEdit, onDelete, index }) {
         border: `1px solid ${cat?.color || '#888'}30`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 19, flexShrink: 0,
-        transition: 'transform 0.2s ease',
       }}
-        onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1) rotate(5deg)'}
-        onMouseOut={e => e.currentTarget.style.transform = 'scale(1) rotate(0deg)'}
       >
         {cat?.icon || '📦'}
       </div>
@@ -92,69 +93,76 @@ function TransactionItem({ tx, onEdit, onDelete, index }) {
       </div>
 
       {/* Context menu */}
-      <div style={{ position: 'relative', flexShrink: 0 }} ref={menuRef}>
+      <div style={{ position: 'relative', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
         <button
-          onClick={() => setShowMenu(v => !v)}
+          onClick={(e) => {
+            e.stopPropagation()
+            setShowMenu(v => !v)
+          }}
           style={{
-            background: showMenu ? 'rgba(255,255,255,0.1)' : 'none',
+            background: showMenu ? 'rgba(255,255,255,0.1)' : 'transparent',
             border: 'none',
-            color: 'var(--text-dim)',
-            width: 28, height: 28,
-            borderRadius: 7,
-            fontSize: 16,
+            color: showMenu ? 'var(--text)' : 'var(--text-dim)',
+            width: 36, height: 36, 
+            borderRadius: 8,
+            fontSize: 18,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.15s',
+            cursor: 'pointer',
           }}
-          onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'var(--text)' }}
-          onMouseOut={e => { if (!showMenu) { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-dim)' } }}
+          className="menu-dots-btn"
         >⋮</button>
 
         {showMenu && (
           <>
             <div
-              onClick={() => setShowMenu(false)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowMenu(false)
+              }}
               style={{ position: 'fixed', inset: 0, zIndex: 299 }}
             />
             <div style={{
-              position: 'absolute', right: 0, top: 'calc(100% + 4px)',
-              background: 'rgba(12,24,44,0.98)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              position: 'absolute',
+              right: 0,
+              top: 'calc(100% + 6px)',
+              background: 'rgba(12, 24, 44, 0.98)',
+              border: '1px solid rgba(255,255,255,0.12)',
               borderRadius: 12,
               overflow: 'hidden',
               zIndex: 300,
-              minWidth: 140,
-              boxShadow: '0 12px 40px rgba(0,0,0,0.6)',
-              backdropFilter: 'blur(12px)',
-              animation: 'slideDown 0.15s ease both',
+              minWidth: 150, 
+              boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
+              backdropFilter: 'blur(16px)',
             }}>
               <button
-                onClick={() => { onEdit(tx); setShowMenu(false) }}
+                onClick={handleEdit}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  width: '100%', padding: '10px 14px',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  width: '100%', padding: '12px 16px', 
                   background: 'none', border: 'none',
-                  color: 'var(--text)', fontSize: 13, textAlign: 'left',
-                  transition: 'background 0.1s',
+                  color: 'var(--text)', fontSize: 13.5, textAlign: 'left',
+                  transition: 'background 0.12s',
+                  cursor: 'pointer',
                 }}
-                onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.07)'}
-                onMouseOut={e => e.currentTarget.style.background = 'none'}
+                className="dropdown-item-btn"
               >
-                <span>✏️</span> Chỉnh sửa
+                <span style={{ fontSize: 14 }}>✏️</span> Chỉnh sửa
               </button>
               <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
               <button
-                onClick={() => { handleDelete(); setShowMenu(false) }}
+                onClick={handleDelete}
                 style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  width: '100%', padding: '10px 14px',
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  width: '100%', padding: '12px 16px', 
                   background: 'none', border: 'none',
-                  color: '#f87171', fontSize: 13, textAlign: 'left',
-                  transition: 'background 0.1s',
+                  color: '#f87171', fontSize: 13.5, textAlign: 'left',
+                  transition: 'background 0.12s',
+                  cursor: 'pointer',
                 }}
-                onMouseOver={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
-                onMouseOut={e => e.currentTarget.style.background = 'none'}
+                className="dropdown-delete-btn"
               >
-                <span>🗑️</span> Xoá
+                <span style={{ fontSize: 14 }}>🗑️</span> Xoá
               </button>
             </div>
           </>
@@ -177,7 +185,27 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
   const total = filtered.length
 
   return (
-    <div className="glass-card" style={{ overflow: 'visible', animation: 'fadeInUp 0.6s ease both', animationDelay: '0.35s' }}>
+    <div className="glass-card transaction-list-card" style={{ overflow: 'visible' }}>
+      {/* Tách phần hover CSS ra thẻ style độc lập để tối ưu UI */}
+      <style>{`
+        .transaction-item-row {
+          background: transparent;
+        }
+        .transaction-item-row:hover {
+          background: rgba(255,255,255,0.04) !important;
+        }
+        .menu-dots-btn:hover {
+          background: rgba(255,255,255,0.08) !important;
+          color: var(--text) !important;
+        }
+        .dropdown-item-btn:hover {
+          background: rgba(255,255,255,0.07) !important;
+        }
+        .dropdown-delete-btn:hover {
+          background: rgba(239,68,68,0.12) !important;
+        }
+      `}</style>
+
       {/* Header */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -200,7 +228,7 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
           border: '1px solid rgba(255,255,255,0.06)',
         }}>
           {[
-            { value: 'all',     label: 'Tất cả' },
+            { value: 'all',    label: 'Tất cả' },
             { value: 'income',  label: '↑ Thu' },
             { value: 'expense', label: '↓ Chi' },
           ].map(opt => (
@@ -217,6 +245,7 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
                 fontSize: 12,
                 transition: 'all 0.18s ease',
                 boxShadow: filter === opt.value ? 'inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
+                cursor: 'pointer',
               }}
             >{opt.label}</button>
           ))}
@@ -225,7 +254,7 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
 
       {/* Content */}
       <div style={{
-        maxHeight: 480, overflowY: 'auto', overflowX: 'visible',
+        overflow: 'visible',
         padding: '6px 4px 8px',
         borderRadius: '0 0 18px 18px',
       }}>
@@ -260,15 +289,17 @@ export default function TransactionList({ transactions, onEdit, onDelete }) {
               </span>
             </div>
 
-            {group.transactions.map((tx, i) => (
-              <TransactionItem
-                key={tx.id}
-                tx={tx}
-                index={i}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
+            {/* List Row Container */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {group.transactions.map((tx) => (
+                <TransactionItem
+                  key={tx.id}
+                  tx={tx}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
           </div>
         ))}
       </div>

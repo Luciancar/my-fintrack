@@ -191,6 +191,10 @@ input, select, textarea { font-family: inherit; }
     inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
+.transaction-list-card:hover {
+  transform: none;
+}
+
 /* ── Shimmer skeleton ── */
 .shimmer {
   background: linear-gradient(90deg,
