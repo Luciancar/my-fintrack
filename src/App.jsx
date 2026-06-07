@@ -63,7 +63,18 @@ export default function App() {
 
       <header style={{ background: 'rgba(3,8,20,0.85)', backdropFilter: 'blur(32px)', position: 'sticky', top: 0, zIndex: 100, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ maxWidth: 1140, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontWeight: 900, fontSize: 17, color: '#fff' }}>FinTrack</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+  <div style={{
+    width: 34, height: 34, borderRadius: 10,
+    background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    fontSize: 18, flexShrink: 0,
+  }}>💰</div>
+  <div>
+    <div style={{ fontWeight: 900, fontSize: 16, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>FinTrack</div>
+    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', letterSpacing: '1.5px', marginTop: 2 }}>QUẢN LÝ CHI TIÊU</div>
+  </div>
+</div>
 
           <div style={{ display:'flex', gap: 4 }}>
             <button onClick={() => setActiveTab('dashboard')} style={{ background: activeTab === 'dashboard' ? 'rgba(99,102,241,0.4)' : 'transparent', border:'none', color:'#fff', padding:'8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>📊 Tổng quan</button>
