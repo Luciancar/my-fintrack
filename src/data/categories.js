@@ -3,7 +3,7 @@ export const CATEGORIES = [
     id: 'food',
     label: 'Ăn & Ở',
     icon: '🍜',
-    color: '#f97316',
+    color: '#f97316',  // cam
     type: 'expense',
     description: 'Ăn uống, thuê nhà, điện nước'
   },
@@ -11,7 +11,7 @@ export const CATEGORIES = [
     id: 'cafe',
     label: 'Cafe & Giải trí',
     icon: '☕',
-    color: '#a855f7',
+    color: '#a855f7',  // tím
     type: 'expense',
     description: 'Cafe, trà sữa, xem phim, vui chơi'
   },
@@ -19,7 +19,7 @@ export const CATEGORIES = [
     id: 'transport',
     label: 'Di chuyển',
     icon: '🚗',
-    color: '#3b82f6',
+    color: '#3b82f6',  // xanh dương
     type: 'expense',
     description: 'Xăng xe, grab, xe buýt, taxi'
   },
@@ -27,7 +27,7 @@ export const CATEGORIES = [
     id: 'personal',
     label: 'Cá nhân',
     icon: '🛍️',
-    color: '#ec4899',
+    color: '#ec4899',  // hồng
     type: 'expense',
     description: 'Quần áo, mỹ phẩm, sức khỏe, học tập'
   },
@@ -35,7 +35,7 @@ export const CATEGORIES = [
     id: 'other_expense',
     label: 'Chi tiêu khác',
     icon: '📦',
-    color: '#6b7280',
+    color: '#f59e0b',  // vàng — thay xám
     type: 'expense',
     description: 'Các khoản chi khác'
   },
