@@ -4,8 +4,7 @@ import { endOfMonth, format } from 'date-fns'
 export default function DateFilter({ year, month, selectedDate, onSelectDate }) {
   const monthStart = format(new Date(year, month - 1, 1), 'yyyy-MM-dd')
   const monthEnd = format(endOfMonth(new Date(year, month - 1)), 'yyyy-MM-dd')
-  const today = format(new Date(), 'yyyy-MM-dd')
-  const maxDate = monthEnd < today ? monthEnd : today
+  const maxDate = monthEnd
   const hasFilter = Boolean(selectedDate)
 
   return (
@@ -13,63 +12,57 @@ export default function DateFilter({ year, month, selectedDate, onSelectDate }) 
       display: 'flex',
       alignItems: 'center',
       gap: 8,
-      minHeight: 44, // Chuẩn UX mobile chống vỡ layout
+      // Bỏ minHeight và fit-content — dùng padding giống MonthPicker
       background: hasFilter ? 'rgba(99,102,241,0.16)' : 'rgba(255,255,255,0.04)',
-      border: `1px solid ${hasFilter ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.09)'}`,
+      backdropFilter: 'blur(12px)',
+      border: `1px solid ${hasFilter ? 'rgba(99,102,241,0.45)' : 'var(--border)'}`,
       borderRadius: 14,
-      padding: '6px 12px',
+      padding: '7px 12px',           // ← khớp với MonthPicker
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
       color: hasFilter ? '#a5b4fc' : 'var(--text-muted)',
-      width: 'fit-content', // Đảm bảo không chiếm toàn màn hình vô lý
-      maxWidth: '100%', // Chống tràn tuyệt đối trên thiết bị nhỏ
-      boxSizing: 'border-box',
     }}>
-      <span style={{ fontSize: 15, flexShrink: 0, userSelect: 'none' }}>📅</span>
+      <span style={{ fontSize: 15, lineHeight: 1, userSelect: 'none' }}>📅</span>
+
       <input
         type="date"
         value={selectedDate || ''}
         min={monthStart}
         max={maxDate}
         onChange={e => onSelectDate(e.target.value || null)}
-        aria-label="Lọc theo ngày"
         style={{
-          width: '100%', // Để input tự co giãn theo container
-          maxWidth: 130, // Khống chế độ rộng tối đa vừa đủ nhìn
+          // Fix width cố định để không bị nhảy layout
+          width: 130,
           background: 'transparent',
           border: 'none',
           outline: 'none',
-          color: 'inherit',
+          color: hasFilter ? '#a5b4fc' : 'var(--text-muted)',
           fontSize: 13,
           fontWeight: 700,
-          colorScheme: 'dark',
           cursor: 'pointer',
+          // Ẩn spinner mặc định của Chrome/Edge
+          colorScheme: 'dark',
         }}
       />
+
       {hasFilter && (
         <button
-          type="button"
           onClick={() => onSelectDate(null)}
-          aria-label="Bỏ lọc ngày"
+          title="Xóa bộ lọc ngày"
           style={{
-            width: 24,
-            height: 24,
-            borderRadius: 8,
-            border: '1px solid rgba(255,255,255,0.08)',
-            background: 'rgba(255,255,255,0.06)',
-            color: '#c7d2fe',
+            width: 20, height: 20,
+            borderRadius: 6,
+            border: 'none',
+            background: 'rgba(255,255,255,0.12)',
+            color: '#fff',
+            cursor: 'pointer',
             fontSize: 14,
-            lineHeight: 1,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0,
-            cursor: 'pointer',
-            transition: 'background 0.15s',
+            lineHeight: 1,
           }}
-          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-          onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-        >
-          ×
-        </button>
+        >×</button>
       )}
     </div>
   )

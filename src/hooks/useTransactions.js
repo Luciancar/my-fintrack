@@ -27,7 +27,7 @@ export function useTransactions(user) {
   const [transactions, setTransactions] = useState(loadLocal)
   const [syncing, setSyncing] = useState(false)
 
-  /* ── Fetch from Supabase when user logs in ── */
+  /* ── Fetch from Supabase - Đã fix logic lấy dữ liệu ── */
   useEffect(() => {
     if (!supabase || !user) return
 
@@ -49,6 +49,8 @@ export function useTransactions(user) {
           }))
           setTransactions(mapped)
           saveLocal(mapped)
+        } else {
+          console.error("Lỗi khi tải từ Supabase:", error)
         }
         setSyncing(false)
       })
