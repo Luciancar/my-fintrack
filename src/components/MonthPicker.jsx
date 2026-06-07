@@ -5,21 +5,69 @@ const MONTHS = [
   'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'
 ]
 
+const pillStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  background: 'rgba(255,255,255,0.04)',
+  backdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 12,
+  padding: '0 14px',
+  height: 42,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+}
+
+const arrowBtn = (pressing) => ({
+  background: pressing ? 'rgba(255,255,255,0.1)' : 'transparent',
+  border: 'none',
+  color: 'rgba(255,255,255,0.6)',
+  width: 24, height: 24,
+  borderRadius: 6,
+  fontSize: 16,
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  cursor: 'pointer',
+  transform: pressing ? 'scale(0.9)' : 'scale(1)',
+  transition: 'all 0.12s',
+  flexShrink: 0,
+})
+
 export default function MonthPicker({ year, month, onChange }) {
   const [pressing, setPressing] = useState(null)
+  const [yearInput, setYearInput] = useState(String(year))
+  const [editingYear, setEditingYear] = useState(false)
 
-  const handlePrev = () => {
-    setPressing('prev')
-    setTimeout(() => setPressing(null), 200)
-    if (month === 1) onChange(year - 1, 12)
-    else onChange(year, month - 1)
+  const press = (side, fn) => {
+    setPressing(side)
+    setTimeout(() => setPressing(null), 180)
+    fn()
   }
 
-  const handleNext = () => {
-    setPressing('next')
-    setTimeout(() => setPressing(null), 200)
+  const prevMonth = () => press('prev', () => {
+    if (month === 1) onChange(year - 1, 12)
+    else onChange(year, month - 1)
+  })
+
+  const nextMonth = () => press('next', () => {
     if (month === 12) onChange(year + 1, 1)
     else onChange(year, month + 1)
+  })
+
+  const prevYear = () => press('pyear', () => {
+    onChange(year - 1, month)
+    setYearInput(String(year - 1))
+  })
+
+  const nextYear = () => press('nyear', () => {
+    onChange(year + 1, month)
+    setYearInput(String(year + 1))
+  })
+
+  const handleYearCommit = () => {
+    const y = parseInt(yearInput)
+    if (!isNaN(y) && y >= 1900 && y <= 2200) onChange(y, month)
+    else setYearInput(String(year))
+    setEditingYear(false)
   }
 
   const isCurrentMonth = (() => {
@@ -27,92 +75,69 @@ export default function MonthPicker({ year, month, onChange }) {
     return year === now.getFullYear() && month === now.getMonth() + 1
   })()
 
-  const currentYear = new Date().getFullYear()
-  // Cho phép chọn từ 5 năm trước đến 2 năm sau
-  const yearOptions = Array.from({ length: 8 }, (_, i) => currentYear - 5 + i)
-
-  const btnStyle = (side) => ({
-    background: pressing === side ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    color: 'rgba(255,255,255,0.6)',
-    width: 34, height: 34,
-    borderRadius: 10,
-    fontSize: 16,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    transition: 'all 0.15s ease',
-    cursor: 'pointer',
-    transform: pressing === side ? 'scale(0.92)' : 'scale(1)',
-  })
-
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      {/* Month picker */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        background: 'rgba(255,255,255,0.04)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 14,
-        padding: '7px 12px',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-      }}>
-        <button onClick={handlePrev} style={btnStyle('prev')}
-          onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
-          onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
-          aria-label="Tháng trước"
+
+      {/* Month pill */}
+      <div style={pillStyle}>
+        <button style={arrowBtn(pressing === 'prev')} onClick={prevMonth}
+          onMouseOver={e => e.currentTarget.style.color = '#fff'}
+          onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
         >‹</button>
 
-        <div style={{ textAlign: 'center', minWidth: 100 }}>
-          <div style={{ fontWeight: 700, fontSize: 14, color: '#fff', letterSpacing: '-0.2px' }}>
+        <div style={{ textAlign: 'center', minWidth: 72 }}>
+          <div style={{ fontWeight: 700, fontSize: 13, color: '#fff', whiteSpace: 'nowrap' }}>
             {MONTHS[month - 1]}
           </div>
           {isCurrentMonth && (
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#818cf8', marginTop: 1, letterSpacing: '0.04em' }}>
-              ● HIỆN TẠI
+            <div style={{ fontSize: 9, color: '#818cf8', letterSpacing: '0.05em', marginTop: 1 }}>● HIỆN TẠI</div>
+          )}
+        </div>
+
+        <button style={arrowBtn(pressing === 'next')} onClick={nextMonth}
+          onMouseOver={e => e.currentTarget.style.color = '#fff'}
+          onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+        >›</button>
+      </div>
+
+      {/* Year pill */}
+      <div style={pillStyle}>
+        <button style={arrowBtn(pressing === 'pyear')} onClick={prevYear}
+          onMouseOver={e => e.currentTarget.style.color = '#fff'}
+          onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+        >‹</button>
+
+        <div style={{ textAlign: 'center', minWidth: 48 }}>
+          {editingYear ? (
+            <input
+              autoFocus
+              value={yearInput}
+              onChange={e => setYearInput(e.target.value)}
+              onBlur={handleYearCommit}
+              onKeyDown={e => e.key === 'Enter' && handleYearCommit()}
+              style={{
+                width: 52, background: 'transparent', border: 'none',
+                outline: 'none', color: '#fff', fontSize: 13,
+                fontWeight: 700, textAlign: 'center',
+              }}
+            />
+          ) : (
+            <div
+              onClick={() => { setEditingYear(true); setYearInput(String(year)) }}
+              title="Click để nhập năm"
+              style={{ fontWeight: 700, fontSize: 13, color: '#fff', cursor: 'text', userSelect: 'none' }}
+            >
+              {year}
             </div>
           )}
         </div>
 
-        <button onClick={handleNext} style={btnStyle('next')}
-          onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
-          onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
-          aria-label="Tháng sau"
+        <button style={arrowBtn(pressing === 'nyear')} onClick={nextYear}
+          onMouseOver={e => e.currentTarget.style.color = '#fff'}
+          onMouseOut={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
         >›</button>
       </div>
 
-      {/* Year picker — dropdown select */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8,
-        background: 'rgba(255,255,255,0.04)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255,255,255,0.1)',
-        borderRadius: 14,
-        padding: '7px 12px',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-      }}>
-        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', userSelect: 'none' }}>📅</span>
-        <select
-          value={year}
-          onChange={e => onChange(Number(e.target.value), month)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            outline: 'none',
-            color: '#fff',
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: 'pointer',
-            colorScheme: 'dark',
-            appearance: 'none',
-            paddingRight: 16,
-          }}
-        >
-          {yearOptions.map(y => (
-            <option key={y} value={y} style={{ background: '#0f172a' }}>{y}</option>
-          ))}
-        </select>
-        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginLeft: -12, pointerEvents: 'none' }}>▾</span>
-      </div>
     </div>
   )
 }

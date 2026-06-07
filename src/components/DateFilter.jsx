@@ -1,29 +1,32 @@
 import React from 'react'
-import { format } from 'date-fns'
+
+const pillStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  backdropFilter: 'blur(12px)',
+  borderRadius: 12,
+  padding: '0 14px',
+  height: 42,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+}
 
 export default function DateFilter({ year, month, selectedDate, onSelectDate }) {
   const hasFilter = Boolean(selectedDate)
 
   return (
     <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 8,
+      ...pillStyle,
       background: hasFilter ? 'rgba(99,102,241,0.16)' : 'rgba(255,255,255,0.04)',
-      backdropFilter: 'blur(12px)',
-      border: `1px solid ${hasFilter ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.09)'}`,
-      borderRadius: 14,
-      padding: '7px 12px',
-      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
-      color: hasFilter ? '#a5b4fc' : 'var(--text-muted)',
+      border: `1px solid ${hasFilter ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.1)'}`,
     }}>
-      <span style={{ fontSize: 15, lineHeight: 1, userSelect: 'none' }}>📅</span>
+      <span style={{ fontSize: 14, userSelect: 'none', lineHeight: 1 }}>📅</span>
       <input
         type="date"
         value={selectedDate || ''}
         onChange={e => onSelectDate(e.target.value || null)}
         style={{
-          width: 130,
+          width: 124,
           background: 'transparent',
           border: 'none',
           outline: 'none',
@@ -37,13 +40,12 @@ export default function DateFilter({ year, month, selectedDate, onSelectDate }) 
       {hasFilter && (
         <button
           onClick={() => onSelectDate(null)}
-          title="Xóa bộ lọc ngày"
+          title="Xóa lọc ngày"
           style={{
-            width: 20, height: 20, borderRadius: 6, border: 'none',
-            background: 'rgba(255,255,255,0.12)', color: '#fff',
-            cursor: 'pointer', fontSize: 14,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0, lineHeight: 1,
+            width: 18, height: 18, borderRadius: 5, border: 'none',
+            background: 'rgba(255,255,255,0.15)', color: '#fff',
+            cursor: 'pointer', fontSize: 12, display: 'flex',
+            alignItems: 'center', justifyContent: 'center', flexShrink: 0,
           }}
         >×</button>
       )}
