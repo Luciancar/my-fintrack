@@ -48,6 +48,20 @@ export function computeLast6Months(transactions) {
   return result
 }
 
+export function computeYearStats(transactions, year) {
+  const result = []
+  for (let m = 1; m <= 12; m++) {
+    const stats = computeMonthStats(transactions, year, m)
+    result.push({
+      month: `T${m}`,
+      income: stats.income,
+      expense: stats.expense,
+      balance: stats.balance,
+    })
+  }
+  return result
+}
+
 export function groupTransactionsByDate(transactions) {
   const groups = {}
   transactions.forEach(t => {
