@@ -12,9 +12,10 @@ export function getTransactionsForMonth(transactions, year, month) {
 
 export function computeMonthStats(transactions, year, month) {
   const txs = getTransactionsForMonth(transactions, year, month)
-  const income = txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+  const income  = txs.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
   const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
-  return { income, expense, balance: income - expense, transactions: txs }
+  const saving  = txs.filter(t => t.type === 'saving').reduce((s, t) => s + t.amount, 0)
+  return { income, expense, saving, balance: income - expense - saving, transactions: txs }
 }
 
 export function computeCategoryBreakdown(transactions) {
@@ -42,6 +43,7 @@ export function computeLast6Months(transactions) {
       shortMonth: format(d, 'MMM'),
       income: stats.income,
       expense: stats.expense,
+      saving: stats.saving,
       balance: stats.balance,
     })
   }
@@ -56,10 +58,25 @@ export function computeYearStats(transactions, year) {
       month: `T${m}`,
       income: stats.income,
       expense: stats.expense,
+      saving: stats.saving,
       balance: stats.balance,
     })
   }
   return result
+}
+
+// Tính tổng cộng dồn cho nhiều năm
+export function computeMultiYearStats(transactions, years) {
+  let income = 0, expense = 0, saving = 0
+  years.forEach(year => {
+    for (let m = 1; m <= 12; m++) {
+      const stats = computeMonthStats(transactions, year, m)
+      income  += stats.income
+      expense += stats.expense
+      saving  += stats.saving
+    }
+  })
+  return { income, expense, saving, balance: income - expense - saving }
 }
 
 export function groupTransactionsByDate(transactions) {
