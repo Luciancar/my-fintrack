@@ -6,7 +6,7 @@ import { computeMonthStats, computeCategoryBreakdown, computeLast6Months, comput
 import SummaryCards from './components/SummaryCards'
 import MonthPicker from './components/MonthPicker'
 import DateFilter from './components/DateFilter'
-import { BarChartSection, PieChartSection, YearChartSection } from './components/Charts'
+import { BarChartSection, PieChartSection, YearChartSection, MultiYearChartSection } from './components/Charts'
 import TransactionList from './components/TransactionList'
 import TransactionModal from './components/TransactionModal'
 import AuthScreen from './components/AuthScreen'
@@ -22,7 +22,6 @@ function usePageMount(delay = 0) {
 }
 
 const EXPENSE_LIMIT = 10_000_000
-const CURRENT_YEAR = new Date().getFullYear()
 
 export default function App() {
   const { user, loading: authLoading, signIn, signUp } = useAuth()
@@ -39,8 +38,6 @@ export default function App() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [selectedDate, setSelectedDate] = useState(null)
-
-  // Year Dashboard: multi-select năm
   const [selectedYears, setSelectedYears] = useState([now.getFullYear()])
   const [yearRangeBase, setYearRangeBase] = useState(now.getFullYear())
 
@@ -48,7 +45,9 @@ export default function App() {
 
   const toggleYear = (y) => {
     setSelectedYears(prev =>
-      prev.includes(y) ? (prev.length > 1 ? prev.filter(x => x !== y) : prev) : [...prev, y].sort()
+      prev.includes(y)
+        ? (prev.length > 1 ? prev.filter(x => x !== y) : prev)
+        : [...prev, y].sort()
     )
   }
 
@@ -60,10 +59,22 @@ export default function App() {
   const categoryBreakdown = computeCategoryBreakdown(filteredTxs)
   const last6Months = computeLast6Months(transactions)
   const yearStats = computeYearStats(transactions, year)
+
+  // Tổng cộng dồn nhiều năm
   const multiYear = computeMultiYearStats(transactions, selectedYears)
 
+  // Dữ liệu so sánh từng năm cho bar chart (tổng cả năm)
+  const multiYearChartData = selectedYears.map(y => {
+    const stats = computeMultiYearStats(transactions, [y])
+    return { year: String(y), income: stats.income, expense: stats.expense }
+  })
+
   const handleEdit = (tx) => { setEditData(tx); setModalOpen(true) }
-  const handleSave = (data) => { if (editData) updateTransaction(editData.id, data); else addTransaction(data); setModalOpen(false); setEditData(null) }
+  const handleSave = (data) => {
+    if (editData) updateTransaction(editData.id, data)
+    else addTransaction(data)
+    setModalOpen(false); setEditData(null)
+  }
 
   const displayName = user?.email?.split('@')[0] || 'User'
   const initials = displayName.slice(0, 2).toUpperCase()
@@ -73,7 +84,6 @@ export default function App() {
   const showAlert = isCurrentMonth && expense > EXPENSE_LIMIT && !alertDismissed
   const alertPct = Math.min((expense / EXPENSE_LIMIT) * 100, 999).toFixed(0)
 
-  // Năm hiển thị trong year picker: yearRangeBase-4 đến yearRangeBase+4
   const yearOptions = Array.from({ length: 9 }, (_, i) => yearRangeBase - 4 + i)
 
   return (
@@ -91,9 +101,15 @@ export default function App() {
           </div>
 
           <div style={{ display:'flex', gap: 4 }}>
-            <button onClick={() => setActiveTab('dashboard')} style={{ background: activeTab === 'dashboard' ? 'rgba(99,102,241,0.4)' : 'transparent', border:'none', color:'#fff', padding:'8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>📊 Tổng quan</button>
-            <button onClick={() => setActiveTab('yearview')} style={{ background: activeTab === 'yearview' ? 'rgba(99,102,241,0.4)' : 'transparent', border:'none', color:'#fff', padding:'8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>📅 Theo năm</button>
-            <button onClick={() => setActiveTab('plans')} style={{ background: activeTab === 'plans' ? 'rgba(99,102,241,0.4)' : 'transparent', border:'none', color:'#fff', padding:'8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>🎯 Kế hoạch</button>
+            {[
+              { id: 'dashboard', label: '📊 Tổng quan' },
+              { id: 'yearview',  label: '📅 Theo năm' },
+              { id: 'plans',     label: '🎯 Kế hoạch' },
+            ].map(tab => (
+              <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{ background: activeTab === tab.id ? 'rgba(99,102,241,0.4)' : 'transparent', border:'none', color:'#fff', padding:'8px 16px', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}>
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -123,7 +139,7 @@ export default function App() {
 
       <main style={{ maxWidth: 1140, margin: '0 auto', padding: '30px 24px' }}>
 
-        {/* ── DASHBOARD TAB ── */}
+        {/* ── DASHBOARD ── */}
         {activeTab === 'dashboard' && (
           <>
             {showAlert && (
@@ -161,7 +177,7 @@ export default function App() {
           </>
         )}
 
-        {/* ── YEAR VIEW TAB ── */}
+        {/* ── THEO NĂM ── */}
         {activeTab === 'yearview' && (
           <>
             <div style={{ marginBottom: 24 }}>
@@ -169,47 +185,46 @@ export default function App() {
               <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Chọn một hoặc nhiều năm để xem tổng cộng dồn</p>
             </div>
 
-            {/* Year picker */}
+            {/* Year multi-select */}
             <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '16px 20px', marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>
                   Đã chọn: <span style={{ color: '#818cf8' }}>{selectedYears.join(', ')}</span>
                 </span>
                 <div style={{ display: 'flex', gap: 6 }}>
-                  <button onClick={() => setYearRangeBase(y => y - 9)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, padding: '4px 10px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 13 }}>‹ Trước</button>
-                  <button onClick={() => setYearRangeBase(y => y + 9)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, padding: '4px 10px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 13 }}>Sau ›</button>
+                  <button onClick={() => setYearRangeBase(y => y - 9)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, padding: '4px 12px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 13 }}>‹</button>
+                  <button onClick={() => setYearRangeBase(y => y + 9)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, padding: '4px 12px', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 13 }}>›</button>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 {yearOptions.map(y => {
-                  const selected = selectedYears.includes(y)
+                  const sel = selectedYears.includes(y)
                   return (
                     <button key={y} onClick={() => toggleYear(y)} style={{
-                      padding: '8px 18px', borderRadius: 10, border: `1px solid ${selected ? '#818cf8' : 'rgba(255,255,255,0.1)'}`,
-                      background: selected ? 'rgba(129,140,248,0.2)' : 'rgba(255,255,255,0.04)',
-                      color: selected ? '#818cf8' : 'rgba(255,255,255,0.5)',
-                      fontWeight: selected ? 700 : 500, fontSize: 14, cursor: 'pointer',
+                      padding: '8px 18px', borderRadius: 10,
+                      border: `1px solid ${sel ? '#818cf8' : 'rgba(255,255,255,0.1)'}`,
+                      background: sel ? 'rgba(129,140,248,0.2)' : 'rgba(255,255,255,0.04)',
+                      color: sel ? '#818cf8' : 'rgba(255,255,255,0.5)',
+                      fontWeight: sel ? 700 : 500, fontSize: 14, cursor: 'pointer',
+                      boxShadow: sel ? '0 0 12px rgba(129,140,248,0.3)' : 'none',
                       transition: 'all 0.15s',
-                      boxShadow: selected ? '0 0 12px rgba(129,140,248,0.3)' : 'none',
                     }}>{y}</button>
                   )
                 })}
               </div>
             </div>
 
-            {/* Summary cards cộng dồn */}
+            {/* Cards tổng cộng dồn */}
             <SummaryCards income={multiYear.income} expense={multiYear.expense} saving={multiYear.saving} balance={multiYear.balance}/>
 
-            {/* Chart từng năm được chọn */}
-            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {selectedYears.map(y => (
-                <YearChartSection key={y} data={computeYearStats(transactions, y)} year={y}/>
-              ))}
+            {/* Bar chart so sánh từng năm (tổng cả năm) */}
+            <div style={{ margin: '20px 0' }}>
+              <MultiYearChartSection data={multiYearChartData}/>
             </div>
           </>
         )}
 
-        {/* ── PLANS TAB ── */}
+        {/* ── KẾ HOẠCH ── */}
         {activeTab === 'plans' && (
           <SavingsPlans plans={plans} onAdd={addPlan} onUpdate={updatePlan} onDelete={deletePlan} onAddSaving={addSaving} avgMonthlyIncome={income}/>
         )}

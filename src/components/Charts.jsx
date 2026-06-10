@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts'
 import { formatShortCurrency, formatCurrency } from '../utils/format'
 
@@ -9,10 +9,8 @@ const TooltipBox = ({ children }) => (
   <div style={{
     background: 'rgba(10,22,40,0.95)',
     border: '1px solid rgba(255,255,255,0.12)',
-    borderRadius: 12,
-    padding: '10px 16px',
-    backdropFilter: 'blur(12px)',
-    fontSize: 13,
+    borderRadius: 12, padding: '10px 16px',
+    backdropFilter: 'blur(12px)', fontSize: 13,
     boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
   }}>{children}</div>
 )
@@ -23,9 +21,9 @@ function BarTooltip({ active, payload, label }) {
     <TooltipBox>
       <div style={{ fontWeight: 700, marginBottom: 8, color: '#f1f5f9', fontSize: 12 }}>{label}</div>
       {payload.map(p => (
-        <div key={p.name} style={{ color: p.color, marginBottom: 3, display: 'flex', justifyContent: 'space-between', gap: 20 }}>
+        <div key={p.name} style={{ marginBottom: 3, display: 'flex', justifyContent: 'space-between', gap: 20 }}>
           <span style={{ color: 'rgba(255,255,255,0.5)' }}>{p.name}</span>
-          <span style={{ fontWeight: 700 }}>{formatCurrency(p.value)}</span>
+          <span style={{ fontWeight: 700, color: p.color }}>{formatCurrency(p.value)}</span>
         </div>
       ))}
     </TooltipBox>
@@ -50,26 +48,14 @@ const RoundedBar = (props) => {
   const r = Math.min(5, width / 2)
   return (
     <path
-      d={`M${x + r},${y} h${width - 2 * r} a${r},${r} 0 0 1 ${r},${r} v${height - r} h-${width} v-${height - r} a${r},${r} 0 0 1 ${r},-${r}z`}
+      d={`M${x+r},${y} h${width-2*r} a${r},${r} 0 0 1 ${r},${r} v${height-r} h-${width} v-${height-r} a${r},${r} 0 0 1 ${r},-${r}z`}
       fill={fill}
       style={{ transition: 'all 0.3s ease', filter: `drop-shadow(0 2px 6px ${fill}60)` }}
     />
   )
 }
 
-const RADIAN = Math.PI / 180
-const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-  if (percent < 0.06) return null
-  const r = innerRadius + (outerRadius - innerRadius) * 0.5
-  const x = cx + r * Math.cos(-midAngle * RADIAN)
-  const y = cy + r * Math.sin(-midAngle * RADIAN)
-  return (
-    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700}>
-      {`${(percent * 100).toFixed(0)}%`}
-    </text>
-  )
-}
-
+/* ── 6 tháng gần nhất ── */
 export function BarChartSection({ data }) {
   return (
     <div className="glass-card" style={{ flex: 3, padding: '22px 24px', minWidth: 280 }}>
@@ -111,22 +97,17 @@ export function BarChartSection({ data }) {
   )
 }
 
+/* ── Biểu đồ theo năm: chỉ Thu & Chi, hiển thị theo tháng ── */
 export function YearChartSection({ data, year }) {
   return (
-    <div className="glass-card" style={{ width: '100%', padding: '22px 24px', marginBottom: 0 }}>
+    <div className="glass-card" style={{ width: '100%', padding: '22px 24px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
         <div>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>
-            Thu nhập vs Chi tiêu theo năm
-          </h3>
-          <p style={{ fontSize: 12, color: 'var(--text-dim)' }}>Toàn bộ 12 tháng năm {year}</p>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>Thu nhập & Chi tiêu theo năm</h3>
+          <p style={{ fontSize: 12, color: 'var(--text-dim)' }}>12 tháng năm {year}</p>
         </div>
         <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-          {[
-            { color: '#10b981', label: 'Thu nhập' },
-            { color: '#ef4444', label: 'Chi tiêu' },
-            { color: '#818cf8', label: 'Số dư' },
-          ].map(d => (
+          {[{ color: '#10b981', label: 'Thu nhập' }, { color: '#ef4444', label: 'Chi tiêu' }].map(d => (
             <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
               <span style={{ width: 8, height: 8, borderRadius: 2, background: d.color, display: 'inline-block' }} />
               {d.label}
@@ -137,51 +118,83 @@ export function YearChartSection({ data, year }) {
       <ResponsiveContainer width="100%" height={240}>
         <AreaChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
           <defs>
-            <linearGradient id="yearIncomeGrad" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="yIncomeGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
               <stop offset="100%" stopColor="#10b981" stopOpacity={0.02} />
             </linearGradient>
-            <linearGradient id="yearExpenseGrad" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id="yExpenseGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#ef4444" stopOpacity={0.3} />
               <stop offset="100%" stopColor="#ef4444" stopOpacity={0.02} />
-            </linearGradient>
-            <linearGradient id="yearBalanceGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#818cf8" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#818cf8" stopOpacity={0.02} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" vertical={false} />
           <XAxis dataKey="month" stroke="transparent" tick={{ fill: '#8fadc8', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
           <YAxis stroke="transparent" tick={{ fill: '#7a9bbf', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={48} />
           <Tooltip content={<BarTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }} />
-          <Area type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={2} fill="url(#yearIncomeGrad)" dot={{ fill: '#10b981', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
-          <Area type="monotone" dataKey="expense" name="Chi tiêu" stroke="#ef4444" strokeWidth={2} fill="url(#yearExpenseGrad)" dot={{ fill: '#ef4444', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
-          <Area type="monotone" dataKey="balance" name="Số dư" stroke="#818cf8" strokeWidth={2} fill="url(#yearBalanceGrad)" dot={{ fill: '#818cf8', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
+          <Area type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={2} fill="url(#yIncomeGrad)" dot={{ fill: '#10b981', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
+          <Area type="monotone" dataKey="expense" name="Chi tiêu" stroke="#ef4444" strokeWidth={2} fill="url(#yExpenseGrad)" dot={{ fill: '#ef4444', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
   )
 }
 
+/* ── Biểu đồ so sánh nhiều năm (dùng ở tab Theo năm) ── */
+export function MultiYearChartSection({ data }) {
+  return (
+    <div className="glass-card" style={{ width: '100%', padding: '22px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+        <div>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>So sánh Thu nhập & Chi tiêu</h3>
+          <p style={{ fontSize: 12, color: 'var(--text-dim)' }}>Tổng theo từng năm</p>
+        </div>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          {[{ color: '#10b981', label: 'Thu nhập' }, { color: '#ef4444', label: 'Chi tiêu' }].map(d => (
+            <div key={d.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: d.color, display: 'inline-block' }} />
+              {d.label}
+            </div>
+          ))}
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height={240}>
+        <BarChart data={data} barGap={4} barCategoryGap="35%">
+          <defs>
+            <linearGradient id="myIncomeGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity={1} />
+              <stop offset="100%" stopColor="#059669" stopOpacity={0.7} />
+            </linearGradient>
+            <linearGradient id="myExpenseGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ef4444" stopOpacity={1} />
+              <stop offset="100%" stopColor="#dc2626" stopOpacity={0.7} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" vertical={false} />
+          <XAxis dataKey="year" stroke="transparent" tick={{ fill: '#8fadc8', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
+          <YAxis stroke="transparent" tick={{ fill: '#7a9bbf', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={52} />
+          <Tooltip content={<BarTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }} />
+          <Bar dataKey="income" name="Thu nhập" fill="url(#myIncomeGrad)" shape={<RoundedBar />} />
+          <Bar dataKey="expense" name="Chi tiêu" fill="url(#myExpenseGrad)" shape={<RoundedBar />} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+/* ── Pie chart phân bổ chi tiêu ── */
 export function PieChartSection({ data }) {
   const [activeIndex, setActiveIndex] = useState(null)
   const total = data.reduce((s, d) => s + d.amount, 0)
   const withPercent = data.map(d => ({
     ...d,
-    percent: total > 0 ? ((d.amount / total) * 100).toFixed(1) : 0,
+    percent: total > 0 ? ((d.amount / total) * 100).toFixed(1) : '0.0',
   }))
 
   if (data.length === 0) {
     return (
-      <div className="glass-card" style={{
-        flex: 2, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center',
-        padding: 32, minWidth: 220, gap: 12,
-      }}>
+      <div className="glass-card" style={{ flex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, minWidth: 220, gap: 12 }}>
         <div style={{ fontSize: 44 }}>📭</div>
-        <div style={{ color: 'var(--text-dim)', fontSize: 13, textAlign: 'center' }}>
-          Chưa có dữ liệu chi tiêu<br/>trong tháng này
-        </div>
+        <div style={{ color: 'var(--text-dim)', fontSize: 13, textAlign: 'center' }}>Chưa có dữ liệu chi tiêu<br/>trong tháng này</div>
       </div>
     )
   }
@@ -190,18 +203,15 @@ export function PieChartSection({ data }) {
     <div className="glass-card" style={{ flex: 2, padding: '22px 24px', minWidth: 220 }}>
       <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Phân bổ chi tiêu</h3>
       <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 16 }}>Tháng này</p>
-      <ResponsiveContainer width="100%" height={170}>
+      <ResponsiveContainer width="100%" height={200}>
         <PieChart>
           <Pie
             data={withPercent}
             cx="50%" cy="50%"
-            innerRadius={48}
-            outerRadius={activeIndex !== null ? 78 : 72}
+            innerRadius={52} outerRadius={activeIndex !== null ? 82 : 76}
             paddingAngle={3}
-            dataKey="amount"
-            nameKey="label"
+            dataKey="amount" nameKey="label"
             labelLine={false}
-            label={renderCustomLabel}
             onMouseEnter={(_, i) => setActiveIndex(i)}
             onMouseLeave={() => setActiveIndex(null)}
             style={{ outline: 'none' }}
@@ -219,16 +229,18 @@ export function PieChartSection({ data }) {
           <Tooltip content={<PieTooltip />} />
         </PieChart>
       </ResponsiveContainer>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 7, marginTop: 6 }}>
+      {/* Legend — hiện % rõ ràng, không render trên biểu đồ */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
         {withPercent.map((d, i) => (
           <div key={d.categoryId}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, opacity: activeIndex === null || activeIndex === i ? 1 : 0.4, transition: 'opacity 0.2s', cursor: 'default' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, opacity: activeIndex === null || activeIndex === i ? 1 : 0.35, transition: 'opacity 0.2s', cursor: 'default' }}
             onMouseEnter={() => setActiveIndex(i)}
             onMouseLeave={() => setActiveIndex(null)}
           >
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: d.color, flexShrink: 0, boxShadow: `0 0 6px ${d.color}80` }} />
+            <span style={{ width: 10, height: 10, borderRadius: '50%', background: d.color, flexShrink: 0, boxShadow: `0 0 6px ${d.color}80` }} />
             <span style={{ flex: 1, color: 'var(--text-muted)' }}>{d.label}</span>
-            <span style={{ color: d.color, fontWeight: 700 }}>{d.percent}%</span>
+            <span style={{ color: '#f1f5f9', fontWeight: 600, minWidth: 40, textAlign: 'right' }}>{formatCurrency(d.amount)}</span>
+            <span style={{ color: d.color, fontWeight: 700, minWidth: 38, textAlign: 'right' }}>{d.percent}%</span>
           </div>
         ))}
       </div>

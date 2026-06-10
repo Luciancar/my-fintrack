@@ -5,7 +5,6 @@ const LOCAL_KEY = 'expense_tracker_transactions'
 const VERSION_KEY = 'expense_tracker_version'
 const CURRENT_VERSION = '2'
 
-/* ── helpers ── */
 function loadLocal() {
   try {
     const v = localStorage.getItem(VERSION_KEY)
@@ -27,10 +26,8 @@ export function useTransactions(user) {
   const [transactions, setTransactions] = useState(loadLocal)
   const [syncing, setSyncing] = useState(false)
 
-  /* ── Fetch from Supabase - Đã fix logic lấy dữ liệu ── */
   useEffect(() => {
     if (!supabase || !user) return
-
     setSyncing(true)
     supabase
       .from('transactions')
@@ -46,22 +43,21 @@ export function useTransactions(user) {
             amount: r.amount,
             date: r.date,
             note: r.note || '',
+            savingNote: r.saving_note || '',
           }))
           setTransactions(mapped)
           saveLocal(mapped)
         } else {
-          console.error("Lỗi khi tải từ Supabase:", error)
+          console.error('Lỗi khi tải từ Supabase:', error)
         }
         setSyncing(false)
       })
   }, [user])
 
-  /* ── Persist locally whenever transactions change (no user) ── */
   useEffect(() => {
     if (!user) saveLocal(transactions)
   }, [transactions, user])
 
-  /* ── Add ── */
   const addTransaction = useCallback(async (tx) => {
     const newTx = { ...tx, id: Date.now().toString() }
     setTransactions(prev => [newTx, ...prev].sort((a, b) => b.date.localeCompare(a.date)))
@@ -75,26 +71,23 @@ export function useTransactions(user) {
         amount: newTx.amount,
         date: newTx.date,
         note: newTx.note || '',
+        saving_note: newTx.savingNote || '',
       })
     }
   }, [user])
 
-  /* ── Delete ── */
   const deleteTransaction = useCallback(async (id) => {
     setTransactions(prev => prev.filter(t => t.id !== id))
-
     if (supabase && user) {
       await supabase.from('transactions').delete().eq('id', id).eq('user_id', user.id)
     }
   }, [user])
 
-  /* ── Update ── */
   const updateTransaction = useCallback(async (id, updates) => {
     setTransactions(prev =>
       prev.map(t => t.id === id ? { ...t, ...updates } : t)
           .sort((a, b) => b.date.localeCompare(a.date))
     )
-
     if (supabase && user) {
       await supabase.from('transactions').update({
         type: updates.type,
@@ -102,6 +95,7 @@ export function useTransactions(user) {
         amount: updates.amount,
         date: updates.date,
         note: updates.note || '',
+        saving_note: updates.savingNote || '',
       }).eq('id', id).eq('user_id', user.id)
     }
   }, [user])
