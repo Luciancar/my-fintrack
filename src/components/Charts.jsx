@@ -44,18 +44,19 @@ function PieTooltip({ active, payload }) {
 
 const RoundedBar = (props) => {
   const { x, y, width, height, fill } = props
-  if (!height || height <= 0) return null
+  if (!height || !isFinite(height) || Math.abs(height) < 1) return null
+  const h = Math.abs(height)
+  const top = height < 0 ? y + height : y
   const r = Math.min(5, width / 2)
   return (
     <path
-      d={`M${x+r},${y} h${width-2*r} a${r},${r} 0 0 1 ${r},${r} v${height-r} h-${width} v-${height-r} a${r},${r} 0 0 1 ${r},-${r}z`}
+      d={`M${x+r},${top} h${width-2*r} a${r},${r} 0 0 1 ${r},${r} v${h-r} h-${width} v-${h-r} a${r},${r} 0 0 1 ${r},-${r}z`}
       fill={fill}
       style={{ transition: 'all 0.3s ease', filter: `drop-shadow(0 2px 6px ${fill}60)` }}
     />
   )
 }
 
-/* ── 6 tháng gần nhất ── */
 export function BarChartSection({ data }) {
   return (
     <div className="glass-card" style={{ flex: 3, padding: '22px 24px', minWidth: 280 }}>
@@ -97,7 +98,6 @@ export function BarChartSection({ data }) {
   )
 }
 
-/* ── Biểu đồ theo năm: chỉ Thu & Chi, hiển thị theo tháng ── */
 export function YearChartSection({ data, year }) {
   return (
     <div className="glass-card" style={{ width: '100%', padding: '22px 24px' }}>
@@ -139,7 +139,6 @@ export function YearChartSection({ data, year }) {
   )
 }
 
-/* ── Biểu đồ so sánh nhiều năm (dùng ở tab Theo năm) ── */
 export function MultiYearChartSection({ data }) {
   return (
     <div className="glass-card" style={{ width: '100%', padding: '22px 24px' }}>
@@ -181,7 +180,6 @@ export function MultiYearChartSection({ data }) {
   )
 }
 
-/* ── Pie chart phân bổ chi tiêu ── */
 export function PieChartSection({ data }) {
   const [activeIndex, setActiveIndex] = useState(null)
   const total = data.reduce((s, d) => s + d.amount, 0)
@@ -229,7 +227,6 @@ export function PieChartSection({ data }) {
           <Tooltip content={<PieTooltip />} />
         </PieChart>
       </ResponsiveContainer>
-      {/* Legend — hiện % rõ ràng, không render trên biểu đồ */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
         {withPercent.map((d, i) => (
           <div key={d.categoryId}
