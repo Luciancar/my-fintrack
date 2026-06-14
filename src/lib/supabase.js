@@ -1,12 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+const SUPABASE_URL = 'https://mraumelxfzanzsrxkpzv.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yYXVtZWx4ZnphbnpzcnhrcHp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MDc5NDYsImV4cCI6MjA5NTk4Mzk0Nn0.QA_LaEmlp9vR60-ITDwAl-2Fz7Vt4Ye09Y5WTpGGvHs'
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.warn('Supabase keys missing — running in local-only mode')
-}
-
-export const supabase = SUPABASE_URL && SUPABASE_ANON_KEY
-  ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
