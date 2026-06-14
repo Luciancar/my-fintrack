@@ -28,30 +28,40 @@ export function useTransactions(user) {
 
   useEffect(() => {
     if (!supabase || !user) return
+
     setSyncing(true)
-    supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('date', { ascending: false })
-      .then(({ data, error }) => {
-        if (!error && data) {
-          const mapped = data.map(r => ({
-            id: r.id,
-            type: r.type,
-            categoryId: r.category_id,
-            amount: r.amount,
-            date: r.date,
-            note: r.note || '',
-            savingNote: r.saving_note || '',
-          }))
-          setTransactions(mapped)
-          saveLocal(mapped)
-        } else {
-          console.error('Lỗi khi tải từ Supabase:', error)
-        }
+
+    // Đợi session được restore trước khi fetch
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
         setSyncing(false)
-      })
+        return
+      }
+
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data) {
+            const mapped = data.map(r => ({
+              id: r.id,
+              type: r.type,
+              categoryId: r.category_id,
+              amount: r.amount,
+              date: r.date,
+              note: r.note || '',
+              savingNote: r.saving_note || '',
+            }))
+            setTransactions(mapped)
+            saveLocal(mapped)
+          } else {
+            console.error('Lỗi khi tải từ Supabase:', error)
+          }
+          setSyncing(false)
+        })
+    })
   }, [user])
 
   useEffect(() => {
@@ -63,7 +73,7 @@ export function useTransactions(user) {
     setTransactions(prev => [newTx, ...prev].sort((a, b) => b.date.localeCompare(a.date)))
 
     if (supabase && user) {
-      await supabase.from('transactions').insert({
+      const { error } = await supabase.from('transactions').insert({
         id: newTx.id,
         user_id: user.id,
         type: newTx.type,
@@ -73,6 +83,7 @@ export function useTransactions(user) {
         note: newTx.note || '',
         saving_note: newTx.savingNote || '',
       })
+      if (error) console.error('Lỗi insert:', error)
     }
   }, [user])
 
