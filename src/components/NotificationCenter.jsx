@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react'
-import { useTheme } from '../ThemeContext'
 
 const STORAGE_KEY = 'fintrack-notifications'
 const NotificationContext = createContext(null)
@@ -50,22 +49,21 @@ export function useNotifications() {
 }
 
 function ToastStack({ toasts, onDismiss }) {
-  const { tokens } = useTheme()
   if (toasts.length === 0) return null
   return (
     <div style={{ position: 'fixed', top: 20, right: 20, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 340 }}>
       {toasts.map((t) => (
         <div key={t.id} style={{
-          background: tokens.headerBg, backdropFilter: 'blur(20px)', border: `1px solid ${tokens.border}`,
+          background: 'var(--header-bg)', backdropFilter: 'blur(20px)', border: '1px solid var(--border)',
           borderRadius: 12, padding: '12px 14px', display: 'flex', gap: 10, alignItems: 'flex-start',
-          boxShadow: tokens.shadow, animation: 'fintrack-toast-in 0.25s ease',
+          boxShadow: 'var(--shadow)', animation: 'fintrack-toast-in 0.25s ease',
         }}>
           <span style={{ fontSize: 18, flexShrink: 0 }}>{t.icon || '🔔'}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: tokens.text }}>{t.title}</div>
-            {t.message && <div style={{ fontSize: 12, color: tokens.textDim, marginTop: 2 }}>{t.message}</div>}
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t.title}</div>
+            {t.message && <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 2 }}>{t.message}</div>}
           </div>
-          <button onClick={() => onDismiss(t.id)} style={{ background: 'none', border: 'none', color: tokens.textFaint, cursor: 'pointer', fontSize: 13, flexShrink: 0 }}>✕</button>
+          <button onClick={() => onDismiss(t.id)} style={{ background: 'none', border: 'none', color: 'var(--text-label)', cursor: 'pointer', fontSize: 13, flexShrink: 0 }}>✕</button>
         </div>
       ))}
       <style>{`@keyframes fintrack-toast-in { from { opacity:0; transform: translateX(20px) } to { opacity:1; transform: translateX(0) } }`}</style>
@@ -74,7 +72,6 @@ function ToastStack({ toasts, onDismiss }) {
 }
 
 export function NotificationBell() {
-  const { tokens } = useTheme()
   const { history, unreadCount, markAllRead, clearHistory } = useNotifications()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
@@ -93,8 +90,8 @@ export function NotificationBell() {
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button onClick={handleOpen} style={{
-        position: 'relative', width: 36, height: 36, borderRadius: 10, background: tokens.surface,
-        border: `1px solid ${tokens.border}`, color: tokens.text, cursor: 'pointer', fontSize: 16,
+        position: 'relative', width: 36, height: 36, borderRadius: 10, background: 'var(--bg-card)',
+        border: '1px solid var(--border)', color: 'var(--text)', cursor: 'pointer', fontSize: 16,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
       }}>
         🔔
@@ -110,25 +107,25 @@ export function NotificationBell() {
       {open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 8px)', right: 0, width: 320,
-          background: tokens.headerBg, backdropFilter: 'blur(24px)', border: `1px solid ${tokens.border}`,
-          borderRadius: 14, zIndex: 200, boxShadow: tokens.shadow, overflow: 'hidden',
+          background: 'var(--header-bg)', backdropFilter: 'blur(24px)', border: '1px solid var(--border)',
+          borderRadius: 14, zIndex: 200, boxShadow: 'var(--shadow)', overflow: 'hidden',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderBottom: `1px solid ${tokens.border}` }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: tokens.text }}>Thông báo</span>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderBottom: '1px solid var(--border)' }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Thông báo</span>
             {history.length > 0 && (
-              <button onClick={clearHistory} style={{ background: 'none', border: 'none', color: tokens.textFaint, fontSize: 12, cursor: 'pointer' }}>Xóa hết</button>
+              <button onClick={clearHistory} style={{ background: 'none', border: 'none', color: 'var(--text-label)', fontSize: 12, cursor: 'pointer' }}>Xóa hết</button>
             )}
           </div>
           <div style={{ maxHeight: 320, overflowY: 'auto' }}>
             {history.length === 0 ? (
-              <div style={{ padding: '24px 14px', textAlign: 'center', color: tokens.textFaint, fontSize: 13 }}>Chưa có thông báo nào</div>
+              <div style={{ padding: '24px 14px', textAlign: 'center', color: 'var(--text-label)', fontSize: 13 }}>Chưa có thông báo nào</div>
             ) : history.map((n) => (
-              <div key={n.id} style={{ padding: '10px 14px', borderBottom: `1px solid ${tokens.border}`, display: 'flex', gap: 10 }}>
+              <div key={n.id} style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', display: 'flex', gap: 10 }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>{n.icon || '🔔'}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: tokens.text }}>{n.title}</div>
-                  {n.message && <div style={{ fontSize: 11.5, color: tokens.textDim, marginTop: 1 }}>{n.message}</div>}
-                  <div style={{ fontSize: 10.5, color: tokens.textFaint, marginTop: 3 }}>{relativeTime(n.time)}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text)' }}>{n.title}</div>
+                  {n.message && <div style={{ fontSize: 11.5, color: 'var(--text-dim)', marginTop: 1 }}>{n.message}</div>}
+                  <div style={{ fontSize: 10.5, color: 'var(--text-label)', marginTop: 3 }}>{relativeTime(n.time)}</div>
                 </div>
               </div>
             ))}

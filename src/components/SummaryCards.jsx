@@ -55,17 +55,17 @@ function SummaryCard({ label, amount, color, glowColor, icon, sub, delay = 0 }) 
       onMouseLeave={handleMouseLeave}
       style={{
         flex: 1, minWidth: 190, padding: '22px 24px',
-        background: 'rgba(255,255,255,0.035)',
+        background: 'var(--bg-card)',
         backdropFilter: 'blur(24px)',
-        border: `1px solid ${hovered ? color + '40' : 'rgba(255,255,255,0.08)'}`,
+        border: `1px solid ${hovered ? color + '40' : 'var(--border)'}`,
         borderTop: `2px solid ${color}60`,
         borderRadius: 20, position: 'relative', overflow: 'hidden', cursor: 'default',
         opacity: visible ? 1 : 0,
         transform: visible
           ? `perspective(800px) rotateX(${tilt.y}deg) rotateY(${tilt.x}deg) translateY(${hovered ? '-4px' : '0'}) scale(${hovered ? 1.02 : 1})`
           : 'translateY(28px) scale(0.95)',
-        transition: visible ? 'border-color 0.25s ease, opacity 0.1s' : `opacity 0.55s ease ${delay}ms, transform 0.55s cubic-bezier(0.34,1.2,0.64,1) ${delay}ms`,
-        boxShadow: hovered ? `0 20px 60px rgba(0,0,0,0.45), 0 0 30px ${glowColor}35` : '0 8px 32px rgba(0,0,0,0.3)',
+        transition: visible ? 'border-color 0.25s ease, opacity 0.1s, background 0.3s ease' : `opacity 0.55s ease ${delay}ms, transform 0.55s cubic-bezier(0.34,1.2,0.64,1) ${delay}ms`,
+        boxShadow: hovered ? `0 20px 60px rgba(0,0,0,0.45), 0 0 30px ${glowColor}35` : 'var(--shadow)',
         willChange: 'transform',
       }}
     >
@@ -74,7 +74,7 @@ function SummaryCard({ label, amount, color, glowColor, icon, sub, delay = 0 }) 
 
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)', background: 'rgba(255,255,255,0.04)', padding: '3px 8px', borderRadius: 5 }}>{label}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-dim)', background: 'var(--bg-glass)', padding: '3px 8px', borderRadius: 5 }}>{label}</span>
           <div style={{ width: 38, height: 38, borderRadius: 11, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, transition: 'transform 0.35s cubic-bezier(0.34,1.4,0.64,1)', transform: hovered ? 'scale(1.2) rotate(8deg)' : 'scale(1)' }}>{icon}</div>
         </div>
         <div style={{ fontSize: 27, fontWeight: 800, color, letterSpacing: '-1.2px', lineHeight: 1, marginBottom: 7, fontVariantNumeric: 'tabular-nums', textShadow: hovered ? `0 0 20px ${color}60` : 'none' }}>

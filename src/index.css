@@ -17,6 +17,7 @@
   --saving-light: #22d3ee;
   --bg: #060d1a;
   --bg-card: rgba(255,255,255,0.04);
+  --bg-card-hover: rgba(255,255,255,0.07);
   --bg-card-solid: #0f1e35;
   --bg-glass: rgba(255,255,255,0.06);
   --border: rgba(255,255,255,0.09);
@@ -28,12 +29,52 @@
   --text-dim:   #7a9bbf;        /* từ #4e6080 → +40% sáng, vẫn phân cấp rõ  */
   --text-label: #a0b8d4;        /* dùng cho label uppercase nhỏ               */
 
+  /* ── Chrome (header / sidebar / tooltip / chart) ── */
+  --header-bg:   rgba(3,8,20,0.85);
+  --accent-soft: rgba(99,102,241,0.35);
+  --accent-text: #818cf8;
+  --tooltip-bg:  rgba(10,22,40,0.95);
+  --grid-line:   rgba(255,255,255,0.06);
+  --axis-label:  #8fadc8;
+  --axis-tick:   #7a9bbf;
+
   --radius: 18px;
   --shadow: 0 8px 32px rgba(0,0,0,0.45);
   --shadow-glow-green:  0 0 24px rgba(16,185,129,0.25);
   --shadow-glow-red:    0 0 24px rgba(239,68,68,0.25);
   --shadow-glow-blue:   0 0 24px rgba(6,182,212,0.25);
   --shadow-glow-purple: 0 0 24px rgba(99,102,241,0.25);
+}
+
+/* ── Light theme overrides ──
+   Toggled by ThemeContext via document.documentElement.dataset.theme = 'light' */
+[data-theme='light'] {
+  --bg: #f1f3f9;
+  --bg-card: rgba(15,23,42,0.035);
+  --bg-card-hover: rgba(15,23,42,0.06);
+  --bg-card-solid: #ffffff;
+  --bg-glass: rgba(15,23,42,0.045);
+  --border: rgba(15,23,42,0.09);
+  --border-bright: rgba(15,23,42,0.16);
+
+  --text:       #0f172a;
+  --text-muted: #475569;
+  --text-dim:   #64748b;
+  --text-label: #52617a;
+
+  --header-bg:   rgba(255,255,255,0.85);
+  --accent-soft: rgba(79,70,229,0.13);
+  --accent-text: #4338ca;
+  --tooltip-bg:  rgba(255,255,255,0.97);
+  --grid-line:   rgba(15,23,42,0.08);
+  --axis-label:  #475569;
+  --axis-tick:   #64748b;
+
+  --shadow: 0 8px 32px rgba(15,23,42,0.12);
+  --shadow-glow-green:  0 0 24px rgba(16,185,129,0.18);
+  --shadow-glow-red:    0 0 24px rgba(239,68,68,0.18);
+  --shadow-glow-blue:   0 0 24px rgba(6,182,212,0.18);
+  --shadow-glow-purple: 0 0 24px rgba(99,102,241,0.18);
 }
 
 body {
@@ -43,6 +84,7 @@ body {
   min-height: 100vh;
   line-height: 1.5;
   overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 /* Animated background mesh */
@@ -56,6 +98,10 @@ body::before {
     radial-gradient(ellipse 50% 60% at 60% 30%, rgba(16,185,129,0.06) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
+  transition: opacity 0.3s ease;
+}
+[data-theme='light'] body::before {
+  opacity: 0.45;
 }
 
 #root {
@@ -67,6 +113,8 @@ body::before {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+[data-theme='light'] ::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.15); }
+[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: rgba(15,23,42,0.25); }
 
 button { cursor: pointer; font-family: inherit; }
 input, select, textarea { font-family: inherit; }
@@ -161,17 +209,18 @@ input, select, textarea { font-family: inherit; }
 
 /* ── Glassmorphism card ── */
 .glass-card {
-  background: rgba(255,255,255,0.035);
+  background: var(--bg-card);
   backdrop-filter: blur(24px) saturate(1.6);
   -webkit-backdrop-filter: blur(24px) saturate(1.6);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow),
     inset 0 1px 0 rgba(255,255,255,0.07),
     inset 0 -1px 0 rgba(0,0,0,0.1);
   transition: transform 0.3s cubic-bezier(0.34,1.2,0.64,1),
               box-shadow 0.3s ease,
-              border-color 0.3s ease;
+              border-color 0.3s ease,
+              background 0.3s ease;
   position: relative;
   overflow: hidden;
 }
@@ -183,9 +232,12 @@ input, select, textarea { font-family: inherit; }
   pointer-events: none;
   border-radius: inherit;
 }
+[data-theme='light'] .glass-card::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 60%);
+}
 .glass-card:hover {
   transform: translateY(-3px) scale(1.005);
-  border-color: rgba(255,255,255,0.14);
+  border-color: var(--border-bright);
   box-shadow: var(--shadow),
     0 20px 60px rgba(0,0,0,0.4),
     inset 0 1px 0 rgba(255,255,255,0.1);

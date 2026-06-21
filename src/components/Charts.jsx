@@ -7,11 +7,11 @@ import { formatShortCurrency, formatCurrency } from '../utils/format'
 
 const TooltipBox = ({ children }) => (
   <div style={{
-    background: 'rgba(10,22,40,0.95)',
-    border: '1px solid rgba(255,255,255,0.12)',
+    background: 'var(--tooltip-bg)',
+    border: '1px solid var(--border)',
     borderRadius: 12, padding: '10px 16px',
     backdropFilter: 'blur(12px)', fontSize: 13,
-    boxShadow: '0 12px 32px rgba(0,0,0,0.5)',
+    boxShadow: 'var(--shadow)',
   }}>{children}</div>
 )
 
@@ -19,10 +19,10 @@ function BarTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
     <TooltipBox>
-      <div style={{ fontWeight: 700, marginBottom: 8, color: '#f1f5f9', fontSize: 12 }}>{label}</div>
+      <div style={{ fontWeight: 700, marginBottom: 8, color: 'var(--text)', fontSize: 12 }}>{label}</div>
       {payload.map(p => (
         <div key={p.name} style={{ marginBottom: 3, display: 'flex', justifyContent: 'space-between', gap: 20 }}>
-          <span style={{ color: 'rgba(255,255,255,0.5)' }}>{p.name}</span>
+          <span style={{ color: 'var(--text-dim)' }}>{p.name}</span>
           <span style={{ fontWeight: 700, color: p.color }}>{formatCurrency(p.value)}</span>
         </div>
       ))}
@@ -36,8 +36,8 @@ function PieTooltip({ active, payload }) {
   return (
     <TooltipBox>
       <div style={{ fontWeight: 700, color: item.payload.color, marginBottom: 4 }}>{item.name}</div>
-      <div style={{ color: '#f1f5f9', fontWeight: 700 }}>{formatCurrency(item.value)}</div>
-      <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 2 }}>{item.payload.percent}% chi tiêu</div>
+      <div style={{ color: 'var(--text)', fontWeight: 700 }}>{formatCurrency(item.value)}</div>
+      <div style={{ color: 'var(--text-dim)', fontSize: 12, marginTop: 2 }}>{item.payload.percent}% chi tiêu</div>
     </TooltipBox>
   )
 }
@@ -86,10 +86,10 @@ export function BarChartSection({ data }) {
               <stop offset="100%" stopColor="#dc2626" stopOpacity={0.7} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" vertical={false} />
-          <XAxis dataKey="shortMonth" stroke="transparent" tick={{ fill: '#8fadc8', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
-          <YAxis stroke="transparent" tick={{ fill: '#7a9bbf', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={44} />
-          <Tooltip content={<BarTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }} />
+          <CartesianGrid strokeDasharray="2 4" stroke="var(--grid-line)" vertical={false} />
+          <XAxis dataKey="shortMonth" stroke="transparent" tick={{ fill: 'var(--axis-label)', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+          <YAxis stroke="transparent" tick={{ fill: 'var(--axis-tick)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={44} />
+          <Tooltip content={<BarTooltip />} cursor={{ fill: 'var(--bg-glass)', radius: 8 }} />
           <Bar dataKey="income" name="Thu nhập" fill="url(#incomeGrad)" shape={<RoundedBar />} />
           <Bar dataKey="expense" name="Chi tiêu" fill="url(#expenseGrad)" shape={<RoundedBar />} />
         </BarChart>
@@ -127,10 +127,10 @@ export function YearChartSection({ data, year }) {
               <stop offset="100%" stopColor="#ef4444" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" vertical={false} />
-          <XAxis dataKey="month" stroke="transparent" tick={{ fill: '#8fadc8', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
-          <YAxis stroke="transparent" tick={{ fill: '#7a9bbf', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={48} />
-          <Tooltip content={<BarTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.08)', strokeWidth: 1 }} />
+          <CartesianGrid strokeDasharray="2 4" stroke="var(--grid-line)" vertical={false} />
+          <XAxis dataKey="month" stroke="transparent" tick={{ fill: 'var(--axis-label)', fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+          <YAxis stroke="transparent" tick={{ fill: 'var(--axis-tick)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={48} />
+          <Tooltip content={<BarTooltip />} cursor={{ stroke: 'var(--border-bright)', strokeWidth: 1 }} />
           <Area type="monotone" dataKey="income" name="Thu nhập" stroke="#10b981" strokeWidth={2} fill="url(#yIncomeGrad)" dot={{ fill: '#10b981', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
           <Area type="monotone" dataKey="expense" name="Chi tiêu" stroke="#ef4444" strokeWidth={2} fill="url(#yExpenseGrad)" dot={{ fill: '#ef4444', r: 3, strokeWidth: 0 }} activeDot={{ r: 5 }} />
         </AreaChart>
@@ -168,10 +168,10 @@ export function MultiYearChartSection({ data }) {
               <stop offset="100%" stopColor="#dc2626" stopOpacity={0.7} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="2 4" stroke="rgba(255,255,255,0.04)" vertical={false} />
-          <XAxis dataKey="year" stroke="transparent" tick={{ fill: '#8fadc8', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
-          <YAxis stroke="transparent" tick={{ fill: '#7a9bbf', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={52} />
-          <Tooltip content={<BarTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 8 }} />
+          <CartesianGrid strokeDasharray="2 4" stroke="var(--grid-line)" vertical={false} />
+          <XAxis dataKey="year" stroke="transparent" tick={{ fill: 'var(--axis-label)', fontSize: 12, fontWeight: 700 }} axisLine={false} tickLine={false} />
+          <YAxis stroke="transparent" tick={{ fill: 'var(--axis-tick)', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={formatShortCurrency} width={52} />
+          <Tooltip content={<BarTooltip />} cursor={{ fill: 'var(--bg-glass)', radius: 8 }} />
           <Bar dataKey="income" name="Thu nhập" fill="url(#myIncomeGrad)" shape={<RoundedBar />} />
           <Bar dataKey="expense" name="Chi tiêu" fill="url(#myExpenseGrad)" shape={<RoundedBar />} />
         </BarChart>
@@ -199,7 +199,7 @@ export function PieChartSection({ data }) {
 
   return (
     <div className="glass-card" style={{ flex: 2, padding: '22px 24px', minWidth: 220 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Phân bổ chi tiêu</h3>
+      <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 2, color: 'var(--text)' }}>Phân bổ chi tiêu</h3>
       <p style={{ fontSize: 12, color: 'var(--text-dim)', marginBottom: 16 }}>Tháng này</p>
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>
@@ -218,7 +218,7 @@ export function PieChartSection({ data }) {
               <Cell
                 key={entry.categoryId}
                 fill={entry.color}
-                stroke={activeIndex === i ? '#fff' : 'transparent'}
+                stroke={activeIndex === i ? 'var(--text)' : 'transparent'}
                 strokeWidth={1.5}
                 style={{ filter: activeIndex === i ? `drop-shadow(0 0 8px ${entry.color})` : 'none', cursor: 'pointer', outline: 'none' }}
               />
@@ -235,12 +235,3 @@ export function PieChartSection({ data }) {
             onMouseLeave={() => setActiveIndex(null)}
           >
             <span style={{ width: 10, height: 10, borderRadius: '50%', background: d.color, flexShrink: 0, boxShadow: `0 0 6px ${d.color}80` }} />
-            <span style={{ flex: 1, color: 'var(--text-muted)' }}>{d.label}</span>
-            <span style={{ color: '#f1f5f9', fontWeight: 600, minWidth: 40, textAlign: 'right' }}>{formatCurrency(d.amount)}</span>
-            <span style={{ color: d.color, fontWeight: 700, minWidth: 38, textAlign: 'right' }}>{d.percent}%</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}

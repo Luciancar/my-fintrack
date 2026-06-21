@@ -15,7 +15,7 @@ import SavingsPlans from './components/SavingsPlans'
 import ChatBot from './components/ChatBot'
 import Sidebar from './components/Sidebar'
 import { NotificationBell, NotificationProvider, useNotifications } from './components/NotificationCenter'
-import { ThemeProvider, useTheme } from './ThemeContext'
+import { ThemeProvider } from './ThemeContext'
 import { supabase } from './lib/supabase'
 
 function usePageMount(delay = 0) {
@@ -38,7 +38,6 @@ export default function App() {
 }
 
 function AppContent() {
-  const { tokens } = useTheme()
   const { notify } = useNotifications()
   const { user, loading: authLoading, signIn, signUp } = useAuth()
   const { transactions, addTransaction, deleteTransaction, updateTransaction } = useTransactions(user)
@@ -78,7 +77,7 @@ function AppContent() {
     )
   }
 
-  if (authLoading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: tokens.bg, color: tokens.text }}>💰</div>
+  if (authLoading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)', color: 'var(--text)' }}>💰</div>
   if (supabase && !user) return <AuthScreen onSignIn={signIn} onSignUp={signUp} />
 
   const { income, expense, saving, balance, transactions: monthTxs } = computeMonthStats(transactions, year, month)
@@ -133,7 +132,7 @@ function AppContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', opacity: pageReady ? 1 : 0, transition: 'opacity 0.4s ease', display: 'flex', color: tokens.text }}>
+    <div style={{ minHeight: '100vh', opacity: pageReady ? 1 : 0, transition: 'opacity 0.4s ease', display: 'flex', color: 'var(--text)' }}>
       <Sidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -144,29 +143,29 @@ function AppContent() {
       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
         <ParticleBackground />
 
-        <header style={{ background: tokens.headerBg, backdropFilter: 'blur(32px)', position: 'sticky', top: 0, zIndex: 90, borderBottom: `1px solid ${tokens.border}` }}>
+        <header style={{ background: 'var(--header-bg)', backdropFilter: 'blur(32px)', position: 'sticky', top: 0, zIndex: 90, borderBottom: '1px solid var(--border)' }}>
           <div style={{ maxWidth: 1140, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 16, color: tokens.text }}>{TAB_TITLES[activeTab]?.title}</div>
-              <div style={{ fontSize: 11.5, color: tokens.textFaint, marginTop: 1 }}>{TAB_TITLES[activeTab]?.subtitle}</div>
+              <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--text)' }}>{TAB_TITLES[activeTab]?.title}</div>
+              <div style={{ fontSize: 11.5, color: 'var(--text-label)', marginTop: 1 }}>{TAB_TITLES[activeTab]?.subtitle}</div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <NotificationBell />
 
               <div style={{ position: 'relative' }}>
-                <button onClick={() => setUserMenuOpen(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: tokens.surface, border: `1px solid ${tokens.border}`, borderRadius: 10, padding: '4px 10px 4px 4px', cursor: 'pointer', color: tokens.text }}>
+                <button onClick={() => setUserMenuOpen(v => !v)} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '4px 10px 4px 4px', cursor: 'pointer', color: 'var(--text)' }}>
                   <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#4f46e5,#9333ea)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{initials}</div>
                   <span style={{ fontSize: 13, fontWeight: 500, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</span>
                   <span style={{ fontSize: 10, opacity: 0.5 }}>▾</span>
                 </button>
                 {userMenuOpen && (
-                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: tokens.headerBg, backdropFilter: 'blur(24px)', border: `1px solid ${tokens.border}`, borderRadius: 10, padding: 6, minWidth: 180, zIndex: 200, boxShadow: tokens.shadow }}>
-                    <div style={{ padding: '8px 10px 6px', borderBottom: `1px solid ${tokens.border}`, marginBottom: 4 }}>
-                      <div style={{ fontSize: 12, color: tokens.textFaint }}>Đăng nhập với</div>
-                      <div style={{ fontSize: 13, fontWeight: 500, marginTop: 2, wordBreak: 'break-all', color: tokens.text }}>{user?.email}</div>
+                  <div style={{ position: 'absolute', top: 'calc(100% + 8px)', right: 0, background: 'var(--header-bg)', backdropFilter: 'blur(24px)', border: '1px solid var(--border)', borderRadius: 10, padding: 6, minWidth: 180, zIndex: 200, boxShadow: 'var(--shadow)' }}>
+                    <div style={{ padding: '8px 10px 6px', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-label)' }}>Đăng nhập với</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, marginTop: 2, wordBreak: 'break-all', color: 'var(--text)' }}>{user?.email}</div>
                     </div>
-                    <button onClick={handleSignOut} style={{ width: '100%', background: 'transparent', border: 'none', color: tokens.danger, padding: '8px 10px', borderRadius: 6, cursor: 'pointer', fontSize: 13, textAlign: 'left' }}
+                    <button onClick={handleSignOut} style={{ width: '100%', background: 'transparent', border: 'none', color: 'var(--danger-light)', padding: '8px 10px', borderRadius: 6, cursor: 'pointer', fontSize: 13, textAlign: 'left' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'rgba(248,113,113,0.1)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >🚪 Đăng xuất</button>
@@ -189,12 +188,12 @@ function AppContent() {
                     <span style={{ fontSize: 24 }}>🔔</span>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 14, color: '#f87171' }}>Cảnh báo! Chi tiêu tháng này đã vượt giới hạn</div>
-                      <div style={{ fontSize: 12, color: tokens.textDim, marginTop: 2 }}>
-                        Đã chi <strong style={{ color: '#f87171' }}>{expense.toLocaleString('vi-VN')}đ</strong> / giới hạn <strong style={{ color: tokens.text }}>10.000.000đ</strong> — vượt <strong style={{ color: '#fbbf24' }}>{alertPct}%</strong>
+                      <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 2 }}>
+                        Đã chi <strong style={{ color: '#f87171' }}>{expense.toLocaleString('vi-VN')}đ</strong> / giới hạn <strong style={{ color: 'var(--text)' }}>10.000.000đ</strong> — vượt <strong style={{ color: '#fbbf24' }}>{alertPct}%</strong>
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => setAlertDismissed(true)} style={{ background: tokens.surface, border: `1px solid ${tokens.border}`, borderRadius: 8, width: 28, height: 28, color: tokens.textDim, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+                  <button onClick={() => setAlertDismissed(true)} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, width: 28, height: 28, color: 'var(--text-dim)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
                 </div>
               )}
 
@@ -222,14 +221,14 @@ function AppContent() {
           {activeTab === 'yearview' && (
             <>
               {/* Year multi-select */}
-              <div style={{ background: tokens.surface, border: `1px solid ${tokens.border}`, borderRadius: 16, padding: '16px 20px', marginBottom: 24 }}>
+              <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: '16px 20px', marginBottom: 24 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <span style={{ fontSize: 13, color: tokens.textDim, fontWeight: 600 }}>
-                    Đã chọn: <span style={{ color: tokens.accentText }}>{selectedYears.join(', ')}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text-dim)', fontWeight: 600 }}>
+                    Đã chọn: <span style={{ color: 'var(--accent-text)' }}>{selectedYears.join(', ')}</span>
                   </span>
                   <div style={{ display: 'flex', gap: 6 }}>
-                    <button onClick={() => setYearRangeBase(y => y - 9)} style={{ background: tokens.surfaceHover, border: `1px solid ${tokens.border}`, borderRadius: 7, padding: '4px 12px', color: tokens.textDim, cursor: 'pointer', fontSize: 13 }}>‹</button>
-                    <button onClick={() => setYearRangeBase(y => y + 9)} style={{ background: tokens.surfaceHover, border: `1px solid ${tokens.border}`, borderRadius: 7, padding: '4px 12px', color: tokens.textDim, cursor: 'pointer', fontSize: 13 }}>›</button>
+                    <button onClick={() => setYearRangeBase(y => y - 9)} style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border)', borderRadius: 7, padding: '4px 12px', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 13 }}>‹</button>
+                    <button onClick={() => setYearRangeBase(y => y + 9)} style={{ background: 'var(--bg-card-hover)', border: '1px solid var(--border)', borderRadius: 7, padding: '4px 12px', color: 'var(--text-dim)', cursor: 'pointer', fontSize: 13 }}>›</button>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -238,11 +237,11 @@ function AppContent() {
                     return (
                       <button key={y} onClick={() => toggleYear(y)} style={{
                         padding: '8px 18px', borderRadius: 10,
-                        border: `1px solid ${sel ? tokens.accentText : tokens.border}`,
-                        background: sel ? tokens.accentSoft : tokens.surface,
-                        color: sel ? tokens.accentText : tokens.textDim,
+                        border: `1px solid ${sel ? 'var(--accent-text)' : 'var(--border)'}`,
+                        background: sel ? 'var(--accent-soft)' : 'var(--bg-card)',
+                        color: sel ? 'var(--accent-text)' : 'var(--text-dim)',
                         fontWeight: sel ? 700 : 500, fontSize: 14, cursor: 'pointer',
-                        boxShadow: sel ? `0 0 12px ${tokens.accentSoft}` : 'none',
+                        boxShadow: sel ? '0 0 12px var(--accent-soft)' : 'none',
                         transition: 'all 0.15s',
                       }}>{y}</button>
                     )
