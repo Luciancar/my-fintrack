@@ -138,7 +138,6 @@ export function YearChartSection({ data, year }) {
     </div>
   )
 }
-
 export function MultiYearChartSection({ data }) {
   return (
     <div className="glass-card" style={{ width: '100%', padding: '22px 24px' }}>
@@ -235,3 +234,12 @@ export function PieChartSection({ data }) {
             onMouseLeave={() => setActiveIndex(null)}
           >
             <span style={{ width: 10, height: 10, borderRadius: '50%', background: d.color, flexShrink: 0, boxShadow: `0 0 6px ${d.color}80` }} />
+            <span style={{ flex: 1, color: 'var(--text-muted)' }}>{d.label}</span>
+            <span style={{ color: 'var(--text)', fontWeight: 600, minWidth: 40, textAlign: 'right' }}>{formatCurrency(d.amount)}</span>
+            <span style={{ color: d.color, fontWeight: 700, minWidth: 38, textAlign: 'right' }}>{d.percent}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
